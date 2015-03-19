@@ -830,10 +830,10 @@ markdown
     Finally, we create a new HTTP server bound to a publicly exposed port on our notebook server (e.g., 9000) and using the self-signed certificate with corresponding key.
 markdown
     <div class="alert" style="border: 1px solid #aaa; background: radial-gradient(ellipse at center, #ffffff 50%, #eee 100%);">
-    <div class="row">
-        <div class="col-sm-1"><img src="https://knowledgeanyhow.org/static/images/favicon_32x32.png" style="margin-top: -6px"/></div>
-        <div class="col-sm-11">In IBM Knowledge Anyhow Workbench, ports 9000 through 9004 are exposed on a public interface. We can bind our webserver to any of those ports.</div>
-    </div>
+        <div class="row">
+            <div class="col-sm-1"><img src="https://knowledgeanyhow.org/static/images/favicon_32x32.png" style="margin-top: -6px"/></div>
+            <div class="col-sm-11">In IBM Knowledge Anyhow Workbench, ports 9000 through 9004 are exposed on a public interface. We can bind our webserver to any of those ports.</div>
+        </div>
     </div>
 code 11
     server = tornado.httpserver.HTTPServer(application, ssl_options = {
@@ -855,6 +855,7 @@ markdown
     <pre style="background-color: transparent">import os
     os.getenv('HOST_PUBLIC_IP')</pre>
         </div>
+    </div>
     </div>
 markdown
     When we visit the web server in a browser and accept the self-signed cert warning, we should see the resulting dashboard. Clicking *Refresh Plot* in the dashboard shows us a new plot. 
@@ -972,7 +973,7 @@ markdown
     <div class="alert" style="border: 1px solid #aaa; background: radial-gradient(ellipse at center, #ffffff 50%, #eee 100%);">
     <div class="row">
         <div class="col-sm-1"><img src="https://knowledgeanyhow.org/static/images/favicon_32x32.png" style="margin-top: -6px"/></div>
-        <div class="col-sm-11">This notebook was created using [IBM Knowledge Anyhow Workbench](https://knowledgeanyhow.org).  To learn more, visit us at https://knowledgeanyhow.org.</div>
+        <div class="col-sm-11">This notebook was created using <a href="https://knowledgeanyhow.org">IBM Knowledge Anyhow Workbench</a>.  To learn more, visit us at <a href="https://knowledgeanyhow.org">https://knowledgeanyhow.org</a>.</div>
         </div>
     </div>
   metadata
