@@ -48,11 +48,24 @@ markdown
         <div class="col-sm-1"><img src="https://knowledgeanyhow.org/static/images/favicon_32x32.png" style="margin-top: -6px"/></div>
         <div class="col-sm-11">In IBM Knowledge Anyhow Workbench, you can drag/drop the file on your workbench browser tab to simplify the uploading process.</div>
     </div>
+    </div>
 code 24
     import pandas as pd
     df_mlb_Salaries = pd.read_csv('/resources/mlb_Salaries_2011.csv').dropna()
     df_mlb_Salaries.describe()
   execute_result
+  - text/plain
+                 yearID           salary
+    count  23141.000000     23141.000000
+    mean    1998.941143   1798885.680135
+    std        7.764378   2970955.921486
+    min     1985.000000         0.000000
+    25%     1993.000000    240000.000000
+    50%     1999.000000    500000.000000
+    75%     2006.000000   2000000.000000
+    max     2012.000000  33000000.000000
+    
+    [8 rows x 2 columns]
   - text/html
     <div style="max-height:1000px;max-width:1500px;overflow:auto;">
     <table border="1" class="dataframe">
@@ -108,18 +121,6 @@ code 24
     </table>
     <p>8 rows × 2 columns</p>
     </div>
-  - text/plain
-                 yearID           salary
-    count  23141.000000     23141.000000
-    mean    1998.941143   1798885.680135
-    std        7.764378   2970955.921486
-    min     1985.000000         0.000000
-    25%     1993.000000    240000.000000
-    50%     1999.000000    500000.000000
-    75%     2006.000000   2000000.000000
-    max     2012.000000  33000000.000000
-    
-    [8 rows x 2 columns]
   metadata
     {
      "collapsed": false
@@ -347,6 +348,15 @@ code 25
 code 26
     df_mlb_Salaries.tail()
   execute_result
+  - text/plain
+           yearID teamID lgID   playerID  salary
+    23136    2012    WAS   NL  detwiro01  485000
+    23137    2012    WAS   NL  stammcr01  485000
+    23138    2012    WAS   NL  marrech01  481000
+    23139    2012    WAS   NL  matthry01  481000
+    23140    2012    WAS   NL  lombast02  481000
+    
+    [5 rows x 5 columns]
   - text/html
     <div style="max-height:1000px;max-width:1500px;overflow:auto;">
     <table border="1" class="dataframe">
@@ -405,15 +415,6 @@ code 26
     </table>
     <p>5 rows × 5 columns</p>
     </div>
-  - text/plain
-           yearID teamID lgID   playerID  salary
-    23136    2012    WAS   NL  detwiro01  485000
-    23137    2012    WAS   NL  stammcr01  485000
-    23138    2012    WAS   NL  marrech01  481000
-    23139    2012    WAS   NL  matthry01  481000
-    23140    2012    WAS   NL  lombast02  481000
-    
-    [5 rows x 5 columns]
   metadata
     {
      "collapsed": false
@@ -461,6 +462,16 @@ code 30
     df_league_salary_history = pd.concat([al, nl], axis=1)
     df_league_salary_history.head()
   execute_result
+  - text/plain
+            American League  National League
+    yearID                                  
+    1985             455597           500249
+    1986             402337           433925
+    1987             441846           427857
+    1988             453901           452374
+    1989             502052           511116
+    
+    [5 rows x 2 columns]
   - text/html
     <div style="max-height:1000px;max-width:1500px;overflow:auto;">
     <table border="1" class="dataframe">
@@ -506,16 +517,6 @@ code 30
     </table>
     <p>5 rows × 2 columns</p>
     </div>
-  - text/plain
-            American League  National League
-    yearID                                  
-    1985             455597           500249
-    1986             402337           433925
-    1987             441846           427857
-    1988             453901           452374
-    1989             502052           511116
-    
-    [5 rows x 2 columns]
   metadata
     {
      "collapsed": false
@@ -526,6 +527,18 @@ markdown
 code 31
     df_league_salary_history.describe()
   execute_result
+  - text/plain
+           American League  National League
+    count        28.000000        28.000000
+    mean    1835922.535714   1698344.607143
+    std     1149009.237987   1016000.909183
+    min      402337.000000    427857.000000
+    25%      990269.750000    887920.250000
+    50%     1434191.000000   1338269.000000
+    75%     2783420.250000   2615311.000000
+    max     3662264.000000   3277278.000000
+    
+    [8 rows x 2 columns]
   - text/html
     <div style="max-height:1000px;max-width:1500px;overflow:auto;">
     <table border="1" class="dataframe">
@@ -581,18 +594,6 @@ code 31
     </table>
     <p>8 rows × 2 columns</p>
     </div>
-  - text/plain
-           American League  National League
-    count        28.000000        28.000000
-    mean    1835922.535714   1698344.607143
-    std     1149009.237987   1016000.909183
-    min      402337.000000    427857.000000
-    25%      990269.750000    887920.250000
-    50%     1434191.000000   1338269.000000
-    75%     2783420.250000   2615311.000000
-    max     3662264.000000   3277278.000000
-    
-    [8 rows x 2 columns]
   metadata
     {
      "collapsed": false
@@ -1013,6 +1014,68 @@ code 34
     df_league_salary_detailed_history.set_index(df_league_salary_detailed_history['Year'])
     df_league_salary_detailed_history
   execute_result
+  - text/plain
+        Year  alAvgSalary  nlAvgSalary  alAnnualSalaryIncrease  \
+    0   1985       455597       500249                       0   
+    1   1986       402337       433925                  -53260   
+    2   1987       441846       427857                   39509   
+    3   1988       453901       452374                   12055   
+    4   1989       502052       511116                   48151   
+    5   1990       500415       525913                   -1637   
+    6   1991       908126       879587                  407711   
+    7   1992      1017651      1085608                  109525   
+    8   1993      1028575       923882                   10924   
+    9   1994      1130703       971003                  102128   
+    10  1995      1039864       890698                  -90839   
+    11  1996      1055235      1000406                   15371   
+    12  1997      1267829      1169651                  212594   
+    13  1998      1364396      1207658                   96567   
+    14  1999      1503986      1468880                  139590   
+    15  2000      2004401      1983096                  500415   
+    16  2001      2333183      2232801                  328782   
+    17  2002      2449016      2342579                  115833   
+    18  2003      2524939      2614933                   75923   
+    19  2004      2517280      2469002                   -7659   
+    20  2005      2681580      2590986                  164300   
+    21  2006      3088941      2616445                  407361   
+    22  2007      3304390      2623749                  215449   
+    23  2008      3449574      2870790                  145184   
+    24  2009      3380833      3184368                  -68741   
+    25  2010      3431360      3142161                   50527   
+    26  2011      3505557      3156654                   74197   
+    27  2012      3662264      3277278                       0   
+    
+        nlAnnualSalaryIncrease  
+    0                        0  
+    1                   -66324  
+    2                    -6068  
+    3                    24517  
+    4                    58742  
+    5                    14797  
+    6                   353674  
+    7                   206021  
+    8                  -161726  
+    9                    47121  
+    10                  -80305  
+    11                  109708  
+    12                  169245  
+    13                   38007  
+    14                  261222  
+    15                  514216  
+    16                  249705  
+    17                  109778  
+    18                  272354  
+    19                 -145931  
+    20                  121984  
+    21                   25459  
+    22                    7304  
+    23                  247041  
+    24                  313578  
+    25                  -42207  
+    26                   14493  
+    27                       0  
+    
+    [28 rows x 5 columns]
   - text/html
     <div style="max-height:1000px;max-width:1500px;overflow:auto;">
     <table border="1" class="dataframe">
@@ -1255,68 +1318,6 @@ code 34
     </table>
     <p>28 rows × 5 columns</p>
     </div>
-  - text/plain
-        Year  alAvgSalary  nlAvgSalary  alAnnualSalaryIncrease  \
-    0   1985       455597       500249                       0   
-    1   1986       402337       433925                  -53260   
-    2   1987       441846       427857                   39509   
-    3   1988       453901       452374                   12055   
-    4   1989       502052       511116                   48151   
-    5   1990       500415       525913                   -1637   
-    6   1991       908126       879587                  407711   
-    7   1992      1017651      1085608                  109525   
-    8   1993      1028575       923882                   10924   
-    9   1994      1130703       971003                  102128   
-    10  1995      1039864       890698                  -90839   
-    11  1996      1055235      1000406                   15371   
-    12  1997      1267829      1169651                  212594   
-    13  1998      1364396      1207658                   96567   
-    14  1999      1503986      1468880                  139590   
-    15  2000      2004401      1983096                  500415   
-    16  2001      2333183      2232801                  328782   
-    17  2002      2449016      2342579                  115833   
-    18  2003      2524939      2614933                   75923   
-    19  2004      2517280      2469002                   -7659   
-    20  2005      2681580      2590986                  164300   
-    21  2006      3088941      2616445                  407361   
-    22  2007      3304390      2623749                  215449   
-    23  2008      3449574      2870790                  145184   
-    24  2009      3380833      3184368                  -68741   
-    25  2010      3431360      3142161                   50527   
-    26  2011      3505557      3156654                   74197   
-    27  2012      3662264      3277278                       0   
-    
-        nlAnnualSalaryIncrease  
-    0                        0  
-    1                   -66324  
-    2                    -6068  
-    3                    24517  
-    4                    58742  
-    5                    14797  
-    6                   353674  
-    7                   206021  
-    8                  -161726  
-    9                    47121  
-    10                  -80305  
-    11                  109708  
-    12                  169245  
-    13                   38007  
-    14                  261222  
-    15                  514216  
-    16                  249705  
-    17                  109778  
-    18                  272354  
-    19                 -145931  
-    20                  121984  
-    21                   25459  
-    22                    7304  
-    23                  247041  
-    24                  313578  
-    25                  -42207  
-    26                   14493  
-    27                       0  
-    
-    [28 rows x 5 columns]
   metadata
     {
      "collapsed": false
