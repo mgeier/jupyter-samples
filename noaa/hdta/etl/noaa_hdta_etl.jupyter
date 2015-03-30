@@ -102,7 +102,7 @@ markdown
     <div class="alert" style="border: 1px solid #aaa; background: radial-gradient(ellipse at center, #ffffff 50%, #eee 100%);">
     <div class="row">
         <div class="col-sm-1"><img src="https://knowledgeanyhow.org/static/images/favicon_32x32.png" style="margin-top: -6px"/></div>
-        <div class="col-sm-11">In IBM Knowledge Anyhow Workbench, the  user workarea is located under the <emphasis>/resources</emphasis> folder.</div>
+        <div class="col-sm-11">In IBM Knowledge Anyhow Workbench, the  user workarea is located under the <emphasis>/resources</emphasis> folder.</div></div>
     </div>
 code
     %%bash
@@ -181,7 +181,7 @@ markdown
     <div class="row">
         <div class="col-sm-1"><img src="https://knowledgeanyhow.org/static/images/favicon_32x32.png" style="margin-top: -6px"/></div>
         <div class="col-sm-11">In IBM Knowledge Anyhow Workbench, you can drag/drop the file on your workbench browser tab to simplify the uploading process.</div>
-    </div>
+    </div></div>
 code
     %%bash
     # Provide the inline code for obtaining the data. See step 3 above.

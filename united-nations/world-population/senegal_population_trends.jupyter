@@ -31,7 +31,7 @@ markdown
     <div class="row">
         <div class="col-sm-1"><img src="https://knowledgeanyhow.org/static/images/favicon_32x32.png" style="margin-top: -6px"/></div>
         <div class="col-sm-11">In IBM Knowledge Anyhow Workbench, you can drag/drop the file on your workbench browser tab to simplify the uploading process.</div>
-    </div>
+    </div></div>
 markdown
     ## Data Exploration
 markdown
@@ -45,6 +45,15 @@ code 2
     df_pop_density = pd.read_csv('/resources/senegal_growth_migration.csv')
     df_pop_density.head(5)
   execute_result
+  - text/plain
+       Country                    Variable         Variant       Year  Value
+    0  Senegal  Population growth rate (%)  Medium variant  1950-1955   2.33
+    1  Senegal  Population growth rate (%)  Medium variant  1955-1960   2.66
+    2  Senegal  Population growth rate (%)  Medium variant  1960-1965   2.77
+    3  Senegal  Population growth rate (%)  Medium variant  1965-1970   2.90
+    4  Senegal  Population growth rate (%)  Medium variant  1970-1975   3.00
+    
+    [5 rows x 5 columns]
   - text/html
     <div style="max-height:1000px;max-width:1500px;overflow:auto;">
     <table border="1" class="dataframe">
@@ -103,15 +112,6 @@ code 2
     </table>
     <p>5 rows × 5 columns</p>
     </div>
-  - text/plain
-       Country                    Variable         Variant       Year  Value
-    0  Senegal  Population growth rate (%)  Medium variant  1950-1955   2.33
-    1  Senegal  Population growth rate (%)  Medium variant  1955-1960   2.66
-    2  Senegal  Population growth rate (%)  Medium variant  1960-1965   2.77
-    3  Senegal  Population growth rate (%)  Medium variant  1965-1970   2.90
-    4  Senegal  Population growth rate (%)  Medium variant  1970-1975   3.00
-    
-    [5 rows x 5 columns]
   metadata
     {
      "collapsed": false
@@ -122,6 +122,49 @@ code 3
     filtered_df = df_pop_density[['Variable','Year','Value']].dropna(how="any")
     filtered_df
   execute_result
+  - text/plain
+                                                 Variable       Year  Value
+    0                          Population growth rate (%)  1950-1955   2.33
+    1                          Population growth rate (%)  1955-1960   2.66
+    2                          Population growth rate (%)  1960-1965   2.77
+    3                          Population growth rate (%)  1965-1970   2.90
+    4                          Population growth rate (%)  1970-1975   3.00
+    5                          Population growth rate (%)  1975-1980   2.56
+    6                          Population growth rate (%)  1980-1985   2.90
+    7                          Population growth rate (%)  1985-1990   3.09
+    8                          Population growth rate (%)  1990-1995   2.96
+    9                          Population growth rate (%)  1995-2000   2.48
+    10                         Population growth rate (%)  2000-2005   2.67
+    11                         Population growth rate (%)  2005-2010   2.78
+    12                         Population growth rate (%)  2010-2015   2.90
+    13          Net migration rate (per 1,000 population)  1950-1955   2.50
+    14          Net migration rate (per 1,000 population)  1955-1960   3.00
+    15          Net migration rate (per 1,000 population)  1960-1965   2.90
+    16          Net migration rate (per 1,000 population)  1965-1970   4.40
+    17          Net migration rate (per 1,000 population)  1970-1975   2.90
+    18          Net migration rate (per 1,000 population)  1975-1980  -5.10
+    19          Net migration rate (per 1,000 population)  1980-1985  -2.80
+    20          Net migration rate (per 1,000 population)  1985-1990  -1.70
+    21          Net migration rate (per 1,000 population)  1990-1995  -1.70
+    22          Net migration rate (per 1,000 population)  1995-2000  -4.50
+    23          Net migration rate (per 1,000 population)  2000-2005  -2.90
+    24          Net migration rate (per 1,000 population)  2005-2010  -2.70
+    25          Net migration rate (per 1,000 population)  2010-2015  -1.40
+    26  Net migration (per year), both sexes combined ...  1950-1955   7.00
+    27  Net migration (per year), both sexes combined ...  1955-1960   9.00
+    28  Net migration (per year), both sexes combined ...  1960-1965  10.00
+    29  Net migration (per year), both sexes combined ...  1965-1970  17.00
+    30  Net migration (per year), both sexes combined ...  1970-1975  13.00
+    31  Net migration (per year), both sexes combined ...  1975-1980 -27.00
+    32  Net migration (per year), both sexes combined ...  1980-1985 -17.00
+    33  Net migration (per year), both sexes combined ...  1985-1990 -12.00
+    34  Net migration (per year), both sexes combined ...  1990-1995 -14.00
+    35  Net migration (per year), both sexes combined ...  1995-2000 -42.00
+    36  Net migration (per year), both sexes combined ...  2000-2005 -30.00
+    37  Net migration (per year), both sexes combined ...  2005-2010 -33.00
+    38  Net migration (per year), both sexes combined ...  2010-2015 -20.00
+    
+    [39 rows x 3 columns]
   - text/html
     <div style="max-height:1000px;max-width:1500px;overflow:auto;">
     <table border="1" class="dataframe">
@@ -372,49 +415,6 @@ code 3
     </table>
     <p>39 rows × 3 columns</p>
     </div>
-  - text/plain
-                                                 Variable       Year  Value
-    0                          Population growth rate (%)  1950-1955   2.33
-    1                          Population growth rate (%)  1955-1960   2.66
-    2                          Population growth rate (%)  1960-1965   2.77
-    3                          Population growth rate (%)  1965-1970   2.90
-    4                          Population growth rate (%)  1970-1975   3.00
-    5                          Population growth rate (%)  1975-1980   2.56
-    6                          Population growth rate (%)  1980-1985   2.90
-    7                          Population growth rate (%)  1985-1990   3.09
-    8                          Population growth rate (%)  1990-1995   2.96
-    9                          Population growth rate (%)  1995-2000   2.48
-    10                         Population growth rate (%)  2000-2005   2.67
-    11                         Population growth rate (%)  2005-2010   2.78
-    12                         Population growth rate (%)  2010-2015   2.90
-    13          Net migration rate (per 1,000 population)  1950-1955   2.50
-    14          Net migration rate (per 1,000 population)  1955-1960   3.00
-    15          Net migration rate (per 1,000 population)  1960-1965   2.90
-    16          Net migration rate (per 1,000 population)  1965-1970   4.40
-    17          Net migration rate (per 1,000 population)  1970-1975   2.90
-    18          Net migration rate (per 1,000 population)  1975-1980  -5.10
-    19          Net migration rate (per 1,000 population)  1980-1985  -2.80
-    20          Net migration rate (per 1,000 population)  1985-1990  -1.70
-    21          Net migration rate (per 1,000 population)  1990-1995  -1.70
-    22          Net migration rate (per 1,000 population)  1995-2000  -4.50
-    23          Net migration rate (per 1,000 population)  2000-2005  -2.90
-    24          Net migration rate (per 1,000 population)  2005-2010  -2.70
-    25          Net migration rate (per 1,000 population)  2010-2015  -1.40
-    26  Net migration (per year), both sexes combined ...  1950-1955   7.00
-    27  Net migration (per year), both sexes combined ...  1955-1960   9.00
-    28  Net migration (per year), both sexes combined ...  1960-1965  10.00
-    29  Net migration (per year), both sexes combined ...  1965-1970  17.00
-    30  Net migration (per year), both sexes combined ...  1970-1975  13.00
-    31  Net migration (per year), both sexes combined ...  1975-1980 -27.00
-    32  Net migration (per year), both sexes combined ...  1980-1985 -17.00
-    33  Net migration (per year), both sexes combined ...  1985-1990 -12.00
-    34  Net migration (per year), both sexes combined ...  1990-1995 -14.00
-    35  Net migration (per year), both sexes combined ...  1995-2000 -42.00
-    36  Net migration (per year), both sexes combined ...  2000-2005 -30.00
-    37  Net migration (per year), both sexes combined ...  2005-2010 -33.00
-    38  Net migration (per year), both sexes combined ...  2010-2015 -20.00
-    
-    [39 rows x 3 columns]
   metadata
     {
      "collapsed": false
@@ -425,6 +425,32 @@ code 4
     df_pivot = filtered_df.pivot_table('Value', 'Year', 'Variable')
     df_pivot.head(5)
   execute_result
+  - text/plain
+    Variable   Net migration (per year), both sexes combined (thousands)  \
+    Year                                                                   
+    1950-1955                                                  7           
+    1955-1960                                                  9           
+    1960-1965                                                 10           
+    1965-1970                                                 17           
+    1970-1975                                                 13           
+    
+    Variable   Net migration rate (per 1,000 population)  \
+    Year                                                   
+    1950-1955                                        2.5   
+    1955-1960                                        3.0   
+    1960-1965                                        2.9   
+    1965-1970                                        4.4   
+    1970-1975                                        2.9   
+    
+    Variable   Population growth rate (%)  
+    Year                                   
+    1950-1955                        2.33  
+    1955-1960                        2.66  
+    1960-1965                        2.77  
+    1965-1970                        2.90  
+    1970-1975                        3.00  
+    
+    [5 rows x 3 columns]
   - text/html
     <div style="max-height:1000px;max-width:1500px;overflow:auto;">
     <table border="1" class="dataframe">
@@ -477,32 +503,6 @@ code 4
     </table>
     <p>5 rows × 3 columns</p>
     </div>
-  - text/plain
-    Variable   Net migration (per year), both sexes combined (thousands)  \
-    Year                                                                   
-    1950-1955                                                  7           
-    1955-1960                                                  9           
-    1960-1965                                                 10           
-    1965-1970                                                 17           
-    1970-1975                                                 13           
-    
-    Variable   Net migration rate (per 1,000 population)  \
-    Year                                                   
-    1950-1955                                        2.5   
-    1955-1960                                        3.0   
-    1960-1965                                        2.9   
-    1965-1970                                        4.4   
-    1970-1975                                        2.9   
-    
-    Variable   Population growth rate (%)  
-    Year                                   
-    1950-1955                        2.33  
-    1955-1960                        2.66  
-    1960-1965                        2.77  
-    1965-1970                        2.90  
-    1970-1975                        3.00  
-    
-    [5 rows x 3 columns]
   metadata
     {
      "collapsed": false,
