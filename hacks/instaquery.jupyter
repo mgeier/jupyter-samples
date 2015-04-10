@@ -6,7 +6,7 @@ markdown
     In this notebook, we'll define an `instaquery()` function that lets you:
     
     1. define a renderer (plot, table, print, etc.)
-    2. filter the day using `pandas.query` syntax
+    2. filter the data using `pandas.query` syntax
     3. specify a column to group-by
     
     This tiny function can be handy for quick, throwaway exploration that you do not want captured permanently in the notebook (e.g., exploration off the primary track).
