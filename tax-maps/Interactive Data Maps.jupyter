@@ -21,19 +21,19 @@ markdown
     !pip install matplotlib==1.4.3
     !pip install pandas==0.15.2
     ```
-code 1
+code 3
     %matplotlib inline
   metadata
     {
      "collapsed": true
     }
-code 2
+code 4
     import matplotlib.pyplot as plt
   metadata
     {
      "collapsed": true
     }
-code 3
+code 5
     import pandas
     import seaborn
   metadata
@@ -48,27 +48,26 @@ markdown
     {
      "render": true
     }
-code 4
+code 6
     !wget -O 13staxcd.txt http://www2.census.gov/govs/statetax/13staxcd.txt
   stream stdout
-    --2015-03-23 15:58:25--  http://www2.census.gov/govs/statetax/13staxcd.txt
-    Resolving www2.census.gov (www2.census.gov)... 23.0.160.82, 23.0.160.32, 2001:559:0:d::17c0:a030, ...
-    Connecting to www2.census.gov (www2.census.gov)|23.0.160.82|:80... connected.
+    --2015-04-10 17:51:24--  http://www2.census.gov/govs/statetax/13staxcd.txt
+    Resolving www2.census.gov (www2.census.gov)... 23.62.6.66, 23.62.6.35, 2001:559:0:5e::1743:f66b, ...
+    Connecting to www2.census.gov (www2.census.gov)|23.62.6.66|:80... connected.
     HTTP request sent, awaiting response... 200 OK
     Length: 16529 (16K) [text/plain]
     Saving to: ‘13staxcd.txt’
     
-    100%[======================================>] 16,529      --.-K/s   in 0.002s  
+    100%[======================================>] 16,529      --.-K/s   in 0.1s    
     
-    utime(13staxcd.txt): Operation not permitted
-    2015-03-23 15:58:25 (6.35 MB/s) - ‘13staxcd.txt’ saved [16529/16529]
+    2015-04-10 17:51:25 (127 KB/s) - ‘13staxcd.txt’ saved [16529/16529]
     
   metadata
     {
      "collapsed": false,
      "scrolled": true
     }
-code 5
+code 7
     df = pandas.read_csv('13staxcd.txt', index_col='ST').dropna(axis=1)
     # Because, yeah, values are in 1000s of dollars
     df = df * 1000
@@ -292,25 +291,25 @@ code 5
     }
 markdown
     We need a second file that provides descriptions for the tax item codes (the TXX numbers).
-code 6
+code 8
     !wget -O TaxItemCodesandDescriptions.xls http://www2.census.gov/govs/statetax/TaxItemCodesandDescriptions.xls
   stream stdout
-    --2015-03-23 16:00:31--  http://www2.census.gov/govs/statetax/TaxItemCodesandDescriptions.xls
-    Resolving www2.census.gov (www2.census.gov)... 23.0.160.10, 23.0.160.82, 2001:559:0:d::17c0:a03a, ...
-    Connecting to www2.census.gov (www2.census.gov)|23.0.160.10|:80... connected.
+    --2015-04-10 17:51:30--  http://www2.census.gov/govs/statetax/TaxItemCodesandDescriptions.xls
+    Resolving www2.census.gov (www2.census.gov)... 23.62.6.66, 23.62.6.35, 2001:559:0:5e::1743:f670, ...
+    Connecting to www2.census.gov (www2.census.gov)|23.62.6.66|:80... connected.
     HTTP request sent, awaiting response... 200 OK
     Length: 15872 (16K) [application/vnd.ms-excel]
     Saving to: ‘TaxItemCodesandDescriptions.xls’
     
     100%[======================================>] 15,872      --.-K/s   in 0s      
     
-    2015-03-23 16:00:31 (93.2 MB/s) - ‘TaxItemCodesandDescriptions.xls’ saved [15872/15872]
+    2015-04-10 17:51:32 (109 MB/s) - ‘TaxItemCodesandDescriptions.xls’ saved [15872/15872]
     
   metadata
     {
      "collapsed": false
     }
-code 7
+code 9
     tax_codes_df = pandas.read_excel('TaxItemCodesandDescriptions.xls', 'Sheet1', index_col='Item Code')
     tax_codes_df.head()
   execute_result
@@ -371,7 +370,7 @@ markdown
     {
      "render": true
     }
-code 8
+code 10
     print '${:,}'.format(df.sum().sum())
   stream stdout
     $846,214,995,000
@@ -392,25 +391,25 @@ markdown
     }
 markdown
     The only thing missing from the data thus far are the "5 broad tax categories", and which of the 25 subcategories make up each one.   We had to [look this up](http://www.census.gov/govs/classification/), and download another [Excel file](http://www2.census.gov/govs/estimate/methodology_for_summary_tabulations.xls).  There's also this [report](http://www2.census.gov/govs/statetax/2013stcreport.pdf), which provides some details about tax categorization, but also seems to contradict the Excel spreadsheet. Oh, the humanity.
-code 9
+code 11
     !wget -O agg_tax_categories.xls http://www2.census.gov/govs/estimate/methodology_for_summary_tabulations.xls
   stream stdout
-    --2015-03-23 16:00:47--  http://www2.census.gov/govs/estimate/methodology_for_summary_tabulations.xls
-    Resolving www2.census.gov (www2.census.gov)... 23.0.160.10, 23.0.160.82, 2001:559:0:d::17c0:a03a, ...
-    Connecting to www2.census.gov (www2.census.gov)|23.0.160.10|:80... connected.
+    --2015-04-10 17:51:37--  http://www2.census.gov/govs/estimate/methodology_for_summary_tabulations.xls
+    Resolving www2.census.gov (www2.census.gov)... 23.62.6.66, 23.62.6.35, 2001:559:0:5e::1743:f66b, ...
+    Connecting to www2.census.gov (www2.census.gov)|23.62.6.66|:80... connected.
     HTTP request sent, awaiting response... 200 OK
     Length: 65024 (64K) [application/vnd.ms-excel]
     Saving to: ‘agg_tax_categories.xls’
     
-    100%[======================================>] 65,024      --.-K/s   in 0.003s  
+    100%[======================================>] 65,024      --.-K/s   in 0.004s  
     
-    2015-03-23 16:00:47 (18.7 MB/s) - ‘agg_tax_categories.xls’ saved [65024/65024]
+    2015-04-10 17:51:44 (17.7 MB/s) - ‘agg_tax_categories.xls’ saved [65024/65024]
     
   metadata
     {
      "collapsed": false
     }
-code 10
+code 12
     tmp = pandas.read_excel('agg_tax_categories.xls')
     tmp[8:21].dropna(how='all').dropna(how='all', axis=1).head()
   execute_result
@@ -504,7 +503,7 @@ code 10
     }
 markdown
     After some investigation, we can write a short function to retrieve the major tax category by tax item code.
-code 11
+code 13
     def category(tax_item):
         '''Return tax category for the tax item code.'''
         if tax_item == 'T01':
@@ -526,7 +525,7 @@ markdown
     {
      "render": true
     }
-code 12
+code 14
     # assign broad category to each tax item code
     tmp = df.copy()
     tmp['Category'] = tmp.index.map(category)
@@ -556,12 +555,12 @@ markdown
     {
      "render": false
     }
-code 13
+code 15
     totals_by_category.plot(kind='pie', labels=totals_by_category.index, 
                             figsize=(10,10), autopct='%.1f%%')
   execute_result
   - text/plain
-    <matplotlib.axes._subplots.AxesSubplot at 0x7f4b72a7e550>
+    <matplotlib.axes._subplots.AxesSubplot at 0x7f4a00294cd0>
   display_data
   - image/png
     iVBORw0KGgoAAAANSUhEUgAAAl8AAAI8CAYAAADP387pAAAABHNCSVQICAgIfAhkiAAAAAlwSFlz
@@ -1132,7 +1131,7 @@ code 13
     RERERF7E8kVERETkRSxfRERERF70/wG7FkVJx52CEQAAAABJRU5ErkJggg==
     
   - text/plain
-    <matplotlib.figure.Figure at 0x7f4b72a7e2d0>
+    <matplotlib.figure.Figure at 0x7f4a002a43d0>
   metadata
     {
      "collapsed": false,
@@ -1148,14 +1147,14 @@ markdown
     {
      "render": true
     }
-code 14
+code 16
     data = by_category.T
     fig, ax = plt.subplots(figsize=(14,10))
     seaborn.violinplot(data, color="Set3", bw=.2, cut=.6,
                        lw=.5, inner="box", inner_kws={"ms": 6}, ax=ax)
   execute_result
   - text/plain
-    <matplotlib.axes._subplots.AxesSubplot at 0x7f4b727862d0>
+    <matplotlib.axes._subplots.AxesSubplot at 0x7f49fffab210>
   display_data
   - image/png
     iVBORw0KGgoAAAANSUhEUgAAAy8AAAJnCAYAAACeUWyFAAAABHNCSVQICAgIfAhkiAAAAAlwSFlz
@@ -1607,13 +1606,13 @@ code 14
     vKDgRURERERE8sL/B8iMiksgRj5xAAAAAElFTkSuQmCC
     
   - text/plain
-    <matplotlib.figure.Figure at 0x7f4b72a7e290>
+    <matplotlib.figure.Figure at 0x7f4a002a4190>
   metadata
     {
      "collapsed": false,
      "render": true
     }
-code 15
+code 17
     print data[['Income Taxes', 'Sales and Gross Receipts Taxes']].describe()
   stream stdout
            Income Taxes  Sales and Gross Receipts Taxes
@@ -1638,7 +1637,7 @@ markdown
     {
      "render": true
     }
-code 16
+code 18
     taxes_by_state = df.sum().sort(inplace=False, ascending=False)
     taxes_by_state[:10].map('${:,}'.format)
   execute_result
@@ -1661,7 +1660,7 @@ code 16
     }
 markdown
     It may not surprise anyone that California and New York top the list; however, it may surprise some that California collected almost twice as much tax revenue as New York.  Here is a bar chart to help visualize the magnitude of taxes collected by state.
-code 17
+code 19
     fig, ax = plt.subplots(figsize=(12,8))
     data = taxes_by_state.reset_index()
     data.columns = ['State', 'Taxes']
@@ -1983,7 +1982,7 @@ code 17
     AAAAAElFTkSuQmCC
     
   - text/plain
-    <matplotlib.figure.Figure at 0x7f4b7266d8d0>
+    <matplotlib.figure.Figure at 0x7f49ffdf31d0>
   metadata
     {
      "collapsed": false,
@@ -2000,7 +1999,7 @@ markdown
     ### Tax Data
     
     Combine the data for the 25 tax subcategories with the cumulative amounts for the 5 broad categories.  This will allow us to map both sets.
-code 18
+code 20
     # the aggregate data by broad category
     tmp = by_category.T
     
@@ -2209,29 +2208,31 @@ markdown
     ### TopoJSON File
     
     We created a TopoJSON file of US borders using [us-atlas](https://github.com/mbostock/us-atlas).  Creation of this file is beyond our scope here, but you can download it from our GitHub repository.
-code 28
-    !wget -O us-states-10m.json https://raw.githubusercontent.com/knowledgeanyhow/notebooks/master/data/us-states-10m.json
+code 21
+    !wget -O us-states-10m.json https://raw.githubusercontent.com/knowledgeanyhow/notebooks/master/tax-maps/data/us-states-10m.json
   stream stdout
-    --2015-03-24 00:05:46--  https://raw.githubusercontent.com/knowledgeanyhow/notebooks/master/data/us-states-10m.json
-    Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 199.27.76.133
-    Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|199.27.76.133|:443... connected.
+    --2015-04-10 17:52:17--  https://raw.githubusercontent.com/knowledgeanyhow/notebooks/master/tax-maps/data/us-states-10m.json
+    Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 199.27.75.133
+    Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|199.27.75.133|:443... connected.
     HTTP request sent, awaiting response... 200 OK
     Length: 651048 (636K) [text/plain]
     Saving to: ‘us-states-10m.json’
     
-    100%[======================================>] 651,048     --.-K/s   in 0.09s   
+    100%[======================================>] 651,048     1.77MB/s   in 0.4s   
     
-    2015-03-24 00:05:47 (7.01 MB/s) - ‘us-states-10m.json’ saved [651048/651048]
+    2015-04-10 17:52:22 (1.77 MB/s) - ‘us-states-10m.json’ saved [651048/651048]
     
   metadata
     {
      "collapsed": false
     }
-code 29
+code 22
     us_topo_map = 'us-states-10m.json'
     
-    import os.path
+    import os
     assert os.path.isfile(us_topo_map)
+    statinfo = os.stat(us_topo_map)
+    assert statinfo.st_size > 0
   metadata
     {
      "collapsed": false
@@ -2240,25 +2241,25 @@ markdown
     ### U.S. FIPS Codes
     
     Our tax data is indexed by state.  We need a way to bind our data to the state geometries in our map.  The geometries in our TopoJSON file are keyed by FIPS codes (Federal Information Processing Standard).  So we need to obtain the FIPS codes for US states (from the US Census Bureau), and add them to our data.
-code 20
+code 23
     !wget -O us_state_FIPS.txt http://www2.census.gov/geo/docs/reference/state.txt
   stream stdout
-    --2015-03-23 16:01:49--  http://www2.census.gov/geo/docs/reference/state.txt
-    Resolving www2.census.gov (www2.census.gov)... 23.0.160.10, 23.0.160.82, 2001:559:0:d::17c0:a03a, ...
-    Connecting to www2.census.gov (www2.census.gov)|23.0.160.10|:80... connected.
+    --2015-04-10 17:52:26--  http://www2.census.gov/geo/docs/reference/state.txt
+    Resolving www2.census.gov (www2.census.gov)... 23.62.6.66, 23.62.6.35, 2001:559:0:5e::1743:f66b, ...
+    Connecting to www2.census.gov (www2.census.gov)|23.62.6.66|:80... connected.
     HTTP request sent, awaiting response... 200 OK
     Length: 1485 (1.5K) [text/plain]
     Saving to: ‘us_state_FIPS.txt’
     
     100%[======================================>] 1,485       --.-K/s   in 0s      
     
-    2015-03-23 16:01:50 (115 MB/s) - ‘us_state_FIPS.txt’ saved [1485/1485]
+    2015-04-10 17:52:27 (7.11 MB/s) - ‘us_state_FIPS.txt’ saved [1485/1485]
     
   metadata
     {
      "collapsed": false
     }
-code 21
+code 24
     fips = pandas.read_csv('us_state_FIPS.txt', delimiter='|', index_col='STUSAB')
     fips.head()
   execute_result
@@ -2327,7 +2328,7 @@ code 21
     }
 markdown
     Add FIPS column to our data.
-code 22
+code 25
     data['FIPS'] = data.index.map(lambda x: fips.loc[x]['STATE'])
     data['FIPS'].head()
   execute_result
@@ -2352,7 +2353,7 @@ markdown
     
     <div class="alert alert-block alert-info" style="margin-top: 20px">The maps below may not render in <a href="http://nbviewer.ipython.org/">nbviewer</a> because they embed JavaScript.
     </div>
-code 30
+code 26
     import folium
     from IPython.display import HTML
     
@@ -2381,7 +2382,7 @@ code 30
     }
 markdown
     Now we create a function that accepts a tax code, creates a basemap of the United States, and adds a TopoJSON overlay with the appropriate state tax data bound to it.
-code 31
+code 27
     def create_tax_map(tax_code, path='tax_map.html'):
         '''
         Create a base map with tax data bound to a GeoJSON overlay.
@@ -2581,7 +2582,7 @@ markdown
     }
 markdown
     Use a widget to choose the tax category and render the map interactively.
-code 32
+code 28
     from IPython.html import widgets
     from IPython.display import display
     from IPython.html.widgets import interact
@@ -2666,7 +2667,7 @@ code 32
     
               
               var color = d3.scale.threshold()
-                  .domain([0.0, 7427.1000000000004, 18567.75, 37135.5, 55703.25, 70557.449999999997])
+                  .domain([0.0, 6680.9000000000005, 16702.25, 33404.5, 50106.75, 63468.549999999996])
                   .range(['#F6EFF7', '#D0D1E6', '#A6BDDB', '#67A9CF', '#3690C0', '#02818A', '#016450']);
               
     
@@ -2709,14 +2710,14 @@ code 32
         legend.addTo(map);
     
         var x = d3.scale.linear()
-        .domain([0, 77613])
+        .domain([0, 69815])
         .range([0, 400]);
     
         var xAxis = d3.svg.axis()
             .scale(x)
             .orient(&quot;top&quot;)
             .tickSize(1)
-            .tickValues([0.0, 7427.1000000000004, 18567.75, 37135.5, 55703.25, 70557.449999999997]);
+            .tickValues([0.0, 6680.9000000000005, 16702.25, 33404.5, 50106.75, 63468.549999999996]);
     
         var svg = d3.select(&quot;.legend.leaflet-control&quot;).append(&quot;svg&quot;)
             .attr(&quot;id&quot;, 'legend')
@@ -2744,13 +2745,16 @@ code 32
         g.call(xAxis).append(&quot;text&quot;)
             .attr(&quot;class&quot;, &quot;caption&quot;)
             .attr(&quot;y&quot;, 21)
-            .text('Income Taxes ($ Millions)');
+            .text('Individual Income Taxes ($ Millions)');
               
     
           };
     
        </script>
     </body>" style="width: 100%; height: 510px; border: none"></iframe>
+  execute_result
+  - text/plain
+    <function __main__.show_map>
   metadata
     {
      "collapsed": false,
