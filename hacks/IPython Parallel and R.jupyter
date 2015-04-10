@@ -1,0 +1,284 @@
+nbformat 4
+nbformat_minor 0
+markdown
+    # IPy Parallel and R
+    
+    In this notebook, we'll use IPython.parallel (IPP) and rpy2 as a quick-and-dirty way of parallelizing work in R. We'll use a cluster of IPP engines running on the same VM as the notebook server to demonstarate. We'll also need to install [rpy2](http://rpy.sourceforge.net/) before we can start.
+    
+    `!pip install rpy2`
+markdown
+    ## Start Local IPP Engines
+    
+    First we must start a cluster of IPP engines. We can do this using the *Cluster* tab of the Jupyter dashboard. Or we can do it programmatically in the notebook.
+code 20
+    from IPython.html.services.clusters.clustermanager import ClusterManager
+  metadata
+    {
+     "collapsed": true
+    }
+code 21
+    cm = ClusterManager()
+  metadata
+    {
+     "collapsed": true
+    }
+markdown
+    We have to list the profiles before we can start anything, even if we know the profile name.
+code 60
+    cm.list_profiles()
+  execute_result
+  - text/plain
+    [{'profile': u'default',
+      'profile_dir': u'/home/notebook/.ipython/profile_default',
+      'status': 'stopped'},
+     {'profile': u'remote',
+      'profile_dir': u'/home/notebook/.ipython/profile_remote',
+      'status': 'stopped'}]
+  metadata
+    {
+     "collapsed": false
+    }
+markdown
+    For our demo purposes, we'll just use the default profile which starts a cluster on the local machine for us.
+code 61
+    cm.start_cluster('default')
+  execute_result
+  - text/plain
+    {'n': 8,
+     'profile': 'default',
+     'profile_dir': u'/home/notebook/.ipython/profile_default',
+     'status': 'running'}
+  metadata
+    {
+     "collapsed": false
+    }
+markdown
+    After running the command above, we need to pause for a few moments to let all the workers come up. (Breathe and count 10 ... 9 ... 8 ...) 
+    
+    Now we can continue to create a DirectView that can talk to all of the workers. (If you get an error, breathe, count so more, and try again in a few.)
+code 27
+    import IPython.parallel
+  metadata
+    {
+     "collapsed": false
+    }
+code 62
+    client = IPython.parallel.Client()
+  metadata
+    {
+     "collapsed": false
+    }
+code 63
+    dv = client[:]
+  metadata
+    {
+     "collapsed": false
+    }
+markdown
+    In my case, I have 8 CPUs so I get 8 workers by default. Your number will likely differ.
+code 72
+    len(dv)
+  execute_result
+  - text/plain
+    8
+  metadata
+    {
+     "collapsed": false
+    }
+markdown
+    To ensure the workers are functioning, we can ask each one to run the bash command `echo $$` to print a PID.
+code 64
+    %%px
+    !echo $$
+  stream stdout
+    [stdout:0] 12973
+    [stdout:1] 12974
+    [stdout:2] 12978
+    [stdout:3] 12980
+    [stdout:4] 12977
+    [stdout:5] 12975
+    [stdout:6] 12976
+    [stdout:7] 12979
+  metadata
+    {
+     "collapsed": false
+    }
+markdown
+    ## Use R on the Engines
+    
+    Next, we'll tell each engine to load the `rpy2.ipython` extension. In our local cluster, this step is easy because all of the workers are running in the same environment as the notebook server. If the engines were remote, we'd have many more installs to do.
+code
+    %%px
+    %load_ext rpy2.ipython
+  metadata
+    {
+     "collapsed": false
+    }
+markdown
+    Now we can tell every engine to run R code using the `%%R` (or `%R`) magic. Let's sample 50 random numbers from a normal distribution.
+code 77
+    %%px
+    %%R 
+    x <- rnorm(50)
+    summary(x)
+  display_data
+  - text/plain
+    [output:0]
+  display_data
+  - text/plain
+        Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+    -2.03500 -0.77970  0.05572 -0.07040  0.49570  2.31900 
+    
+  - metadata
+    {
+     "engine": 0
+    }
+  display_data
+  - text/plain
+    [output:1]
+  display_data
+  - text/plain
+        Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+    -2.00000 -0.74080  0.02746 -0.02496  0.53140  2.38700 
+    
+  - metadata
+    {
+     "engine": 1
+    }
+  display_data
+  - text/plain
+    [output:2]
+  display_data
+  - text/plain
+        Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+    -1.96800 -0.80070  0.07342 -0.05425  0.61380  2.01700 
+    
+  - metadata
+    {
+     "engine": 2
+    }
+  display_data
+  - text/plain
+    [output:3]
+  display_data
+  - text/plain
+        Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+    -2.81100 -0.44310  0.01515 -0.04424  0.49470  1.90200 
+    
+  - metadata
+    {
+     "engine": 3
+    }
+  display_data
+  - text/plain
+    [output:4]
+  display_data
+  - text/plain
+        Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+    -1.45400 -0.36850  0.04397  0.04665  0.42520  1.43300 
+    
+  - metadata
+    {
+     "engine": 4
+    }
+  display_data
+  - text/plain
+    [output:5]
+  display_data
+  - text/plain
+        Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+    -2.32200 -0.75890  0.01176  0.05932  0.87360  2.35100 
+    
+  - metadata
+    {
+     "engine": 5
+    }
+  display_data
+  - text/plain
+    [output:6]
+  display_data
+  - text/plain
+       Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    -1.8590 -0.2639  0.1336  0.1777  0.8915  3.2200 
+    
+  - metadata
+    {
+     "engine": 6
+    }
+  display_data
+  - text/plain
+    [output:7]
+  display_data
+  - text/plain
+       Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    -3.5150 -0.9433 -0.1412 -0.2161  0.5414  2.4960 
+    
+  - metadata
+    {
+     "engine": 7
+    }
+  metadata
+    {
+     "collapsed": false
+    }
+markdown
+    ## Pull it Back to Python
+    
+    With our hack, we can't simply pull the R vectors back to the local notebook. (IPP can't pickle them.) But we can convert them to Python and pull the resulting objects back.
+code 78
+    %%px
+    %Rpull x
+    x = list(x)
+  metadata
+    {
+     "collapsed": false
+    }
+code 79
+    x = dv.gather('x', block=True)
+  metadata
+    {
+     "collapsed": false
+    }
+markdown
+    We should get 50 elements per engine.
+code 80
+    assert len(x) == 50 * len(dv)
+  metadata
+    {
+     "collapsed": false
+    }
+markdown
+    ## Clean Up the Engines
+    
+    When we're done, we can clean up any engines started using the code at the top of this notebook with the following call.
+code 81
+    cm.stop_cluster('default')
+  execute_result
+  - text/plain
+    {'profile': u'default',
+     'profile_dir': u'/home/notebook/.ipython/profile_default',
+     'status': 'stopped'}
+  metadata
+    {
+     "collapsed": false
+    }
+metadata
+    {
+     "kernelspec": {
+      "display_name": "Python 2",
+      "language": "python",
+      "name": "python2"
+     },
+     "language_info": {
+      "codemirror_mode": {
+       "name": "ipython",
+       "version": 2
+      },
+      "file_extension": ".py",
+      "mimetype": "text/x-python",
+      "name": "python",
+      "nbconvert_exporter": "python",
+      "pygments_lexer": "ipython2",
+      "version": "2.7.6"
+     }
+    }
