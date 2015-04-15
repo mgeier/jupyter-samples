@@ -1,0 +1,88 @@
+nbformat 4
+nbformat_minor 0
+markdown
+    # Hacker News Daily Runner
+    
+    Executes the `Hacker News and AlchemyAPI.ipynb` notebook to aggregate data over time. Meant to be left running indefinitely in the background so that the job scheduler can execute once a day.
+    
+    You can use this pattern of running notebooks on a pre-defined schedules in your own notebooks that collect data or compute analysis over time.
+    
+    ## Prerequisites
+    
+    ```
+    !pip install schedule
+    !pip install runipy
+    ```
+code
+    import schedule
+    import time
+    import subprocess
+  metadata
+    {
+     "collapsed": false
+    }
+code
+    NOTEBOOK_FILENAME = 'Hacker News and AlchemyAPI.ipynb'
+  metadata
+    {
+     "collapsed": false
+    }
+code
+    def run_notebook():
+        subprocess.check_call(['runipy', '-o', NOTEBOOK_FILENAME])
+  metadata
+    {
+     "collapsed": false
+    }
+code
+    def aggregate_hacker_news_data():
+        try:
+            run_notebook()
+        except Exception:
+            import traceback
+            traceback.print_exc()
+  metadata
+    {
+     "collapsed": false
+    }
+code
+    schedule.every().hour.do(aggregate_hacker_news_data)
+    #schedule.every().minute.do(aggregate_hacker_news_data)
+  metadata
+    {
+     "collapsed": false
+    }
+code
+    while True:
+        schedule.run_pending()
+        time.sleep(30)
+  metadata
+    {
+     "collapsed": false
+    }
+code
+    
+  metadata
+    {
+     "collapsed": true
+    }
+metadata
+    {
+     "kernelspec": {
+      "display_name": "Python 2",
+      "language": "python",
+      "name": "python2"
+     },
+     "language_info": {
+      "codemirror_mode": {
+       "name": "ipython",
+       "version": 2
+      },
+      "file_extension": ".py",
+      "mimetype": "text/x-python",
+      "name": "python",
+      "nbconvert_exporter": "python",
+      "pygments_lexer": "ipython2",
+      "version": "2.7.6"
+     }
+    }
