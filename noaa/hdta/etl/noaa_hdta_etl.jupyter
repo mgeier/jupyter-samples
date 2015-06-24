@@ -96,13 +96,14 @@ markdown
     
     1. The initial project research used the 15-March-2015 snapshot of the GHCN Dataset. The folder structure allows for other snapshots to be used.
     2. This notebook can be used to generate both Hierarchical Data Format and comma delimited files. It is recommended to pick one or the other as disk space requirements can be as large as:
-        * HDF5: 8GB
-        * CSV: 4GB
+    
+        * HDF5: <font color="red">8GB</font>
+        * CSV: <font color="red">4GB</font>
 markdown
     <div class="alert" style="border: 1px solid #aaa; background: radial-gradient(ellipse at center, #ffffff 50%, #eee 100%);">
     <div class="row">
         <div class="col-sm-1"><img src="https://knowledgeanyhow.org/static/images/favicon_32x32.png" style="margin-top: -6px"/></div>
-        <div class="col-sm-11">In IBM Knowledge Anyhow Workbench, the  user workarea is located under the /resources folder.</div>
+        <div class="col-sm-11">In IBM Knowledge Anyhow Workbench, the  user workarea is located under the "resources" folder.</div>
         </div>
     </div>
 code

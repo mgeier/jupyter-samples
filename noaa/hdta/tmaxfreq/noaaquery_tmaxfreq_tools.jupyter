@@ -1,0 +1,224 @@
+nbformat 4
+nbformat_minor 0
+markdown
+    ## Tools for NOAA TMAX Record Frequency Analysis
+code 1
+    # <help>
+  metadata
+    {
+     "collapsed": true
+    }
+code 2
+    # <api>
+    from IPython.display import display, Image
+    from IPython.html.widgets import interact_manual
+    import matplotlib.pyplot as plt
+    import os
+    import struct
+    import glob
+    import seaborn as sns
+    import pandas as pd
+    import datetime as dt
+    
+    ## Use this global variable to specify the path for station summary files.
+    NOAA_STATION_SUMMARY_PATH = ".noaa/hdta/derived/summaries/"
+    
+    ## Build Station List
+    station_detail_colnames = ['StationID','State','Name',
+                                'Latitude','Longitude','QueryTag']
+    
+    station_detail_rec_template = {'StationID': "",
+                                    'State': "",
+                                    'Name': "",
+                                    'Latitude': "",
+                                    'Longitude': "",
+                                    'QueryTag': ""
+                                    }
+    
+    STATION_DETAIL = '/resources/ghcnd-stations.txt'
+    
+    def get_filename(pathname):
+        '''Fetch filename portion of pathname.'''
+        plist = pathname.split('/')
+        fname, fext = os.path.splitext(plist[len(plist)-1])
+        return fname
+    
+    def fetch_station_list():
+        station_list = []
+        raw_files = os.path.join('.noaa/hdta/derived/summaries/','','*_sum.csv')
+        for index, fname in enumerate(glob.glob(raw_files)):
+            f = get_filename(fname).split('_')[0]
+            station_list.append(str(f))
+        return station_list
+    
+    def process_station_detail(fname,stations): 
+        '''Return dataframe of station detail.'''
+        station_list = []
+        with open(fname,'r') as f:
+            lines = f.readlines()
+            f.close()
+            for line in lines:
+                r = noaa_gather_station_detail(line,stations)
+                station_list += r
+        return pd.DataFrame(station_list,columns=station_detail_colnames)
+          
+    def noaa_gather_station_detail(line,slist):
+        '''Build a list of stattion tuples.'''
+        station_tuple_list = []
+        station_id_key = line[0:3]
+        if station_id_key == 'USC' or station_id_key == 'USW': 
+            fields = struct.unpack('12s9s10s7s2s30s', line[0:70])
+            if fields[0].strip() in slist:
+                station_tuple = dict(station_detail_rec_template)
+                station_tuple['StationID'] = fields[0].strip()
+                station_tuple['State'] = fields[4].strip()
+                station_tuple['Name'] = fields[5].strip()
+                station_tuple['Latitude'] = fields[1].strip()
+                station_tuple['Longitude'] = fields[2].strip()
+                qt = "{0} at {1} in {2}".format(fields[0].strip(),fields[5].strip(),fields[4].strip())
+                station_tuple['QueryTag'] = qt
+                station_tuple_list.append(station_tuple)
+        return station_tuple_list
+    
+    # Exploration Widget
+    month_abbrev = { 1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr',
+                        5: 'May', 6: 'Jun', 7: 'Jul', 8: 'Aug',
+                        9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'
+                    }
+    
+    def compute_years_of_station_data(df):
+        yrs = dt.date.today().year-min(df['FirstYearOfRecord'])
+        print("This weather station has been in service and collecting data for {0} years.").format(yrs)
+        return
+        
+    def compute_tmax_record_quantity(df,freq):
+        threshold = int(freq)
+        df_result = df.query('(TMaxRecordCount > @threshold)')
+        return df_result
+        
+    def fetch_station_data(stationid):
+        fname = os.path.join(NOAA_STATION_SUMMARY_PATH,'',stationid+'_sum.csv')
+        return pd.DataFrame.from_csv(fname)
+    
+    def create_day_identifier(month,day):
+        return str(day)+'-'+month_abbrev[int(month)]
+        
+    def create_date_list(mlist,dlist):
+        mv = mlist.values()
+        dv = dlist.values()
+        new_list = []
+        for index, value in enumerate(mv):
+            new_list.append(create_day_identifier(value,dv[index]))
+        return new_list
+    
+    def create_record_date_list(mlist,dlist,ylist):
+        mv = mlist.values()
+        dv = dlist.values()
+        yv = ylist.values()
+        new_list = []
+        for index, value in enumerate(mv):      
+            new_list.append(dt.date(yv[index],value,dv[index]))
+        return new_list
+    
+    def compute_max_record_durations(df):
+        dates = create_date_list(df['Month'].to_dict(),df['Day'].to_dict())
+        s_dates = pd.Series(dates)
+        s_values = pd.Series(df['MaxDurTMaxRecord'].to_dict().values())
+        df_new = pd.concat([s_dates, s_values], axis=1)
+        df_new.columns = {"Duration","Date"}
+        return df_new
+    
+    def plot_tmax_record_results(df):
+        dates = create_record_date_list(df['Month'].to_dict(),
+                                        df['Day'].to_dict(),
+                                        df['TMaxRecordYear'].to_dict()
+                                       )
+        s_dates = pd.Series(dates)
+        s_tempvalues = pd.Series(df['TMax'].to_dict().values())
+        df_new = pd.concat([s_dates,s_tempvalues], axis=1)
+        df_new.columns = {"RecordDate","RecordHighTemp"}
+        plt.figure(figsize = (9,9), dpi = 72)
+        plt.xticks(rotation=90)
+        sns.pointplot(df_new["RecordDate"],df_new["RecordHighTemp"])
+        return df_new
+    
+    def plot_duration_results(df):
+        plt.figure(figsize = (9,9), dpi = 72)
+        plt.xlabel('Day')
+        plt.ylabel('Record Duration in Years')
+        plt.title('Maximum Duration for TMax Records')
+        ax = plt.gca()
+        colors= ['r', 'b']
+        df.plot(kind='bar',color=colors, alpha=0.75, ax=ax)
+        ax.xaxis.set_ticklabels( ['%s'  % i for i in df.Date.values] )
+        plt.grid(b=True, which='major', linewidth=1.0)
+        plt.grid(b=True, which='minor')
+        return
+    
+    def explore_tmaxfreq(station,hirec):
+        df_station_detail = fetch_station_data(station)
+        df_station_address_detail = process_station_detail(STATION_DETAIL,fetch_station_list())
+        df_station_name = df_station_address_detail.query("(StationID == @station)")
+        qt = df_station_name.iloc[0]["QueryTag"]
+        print("Historical high temperature record analysis for weather station {0}.").format(qt)
+        display(df_station_name)
+        print("Station detail, quick glimpse.")
+        display(df_station_detail.head())    
+        compute_years_of_station_data(df_station_detail)
+        df_record_days = compute_tmax_record_quantity(df_station_detail,hirec)
+        if not df_record_days.empty:
+            print("This station has experienced {0} days of new record highs where a new record has been set more than {1} times throughout the operation of the station.").format(len(df_record_days),hirec)
+            display(df_record_days.head(10))
+            print("Displayed above are the details for up to the first 10 new record high events. All records are ploted below.")
+            df_rec_results = plot_tmax_record_results(df_record_days)
+            df_durations = compute_max_record_durations(df_record_days)
+            plot_duration_results(df_durations)
+        else:
+            print("This weather station has not experienced any days with greater than {0} new record highs.").format(hirec)
+        return 
+            
+    def noaaquery(renderer=lambda station,hirec : explore_tmaxfreq(station,hirec)):
+        '''
+        Creates an interactive query widget with an optional custom renderer.
+        
+        station: Weather Station ID
+        hirec: Query indicator for the maximum number of TMAX records for a given day.
+        '''
+        df_station_detail = process_station_detail(STATION_DETAIL,fetch_station_list())
+        station_vals = tuple(df_station_detail.StationID)
+        hirec_vals = tuple(map(str, range(1,51)))
+    
+        @interact_manual(station=station_vals, hirec=hirec_vals)
+        def noaaquery(station, hirec):
+            '''Inner function that gets called when the user interacts with the widgets.'''
+            try:
+                station_id = station.strip()
+                high_rec_freq = hirec
+            except Exception as e:
+                print("Widget Error: {0}").format(e.message)
+            renderer(station_id, high_rec_freq)
+  metadata
+    {
+     "collapsed": false
+    }
+metadata
+    {
+     "celltoolbar": "Dashboard",
+     "kernelspec": {
+      "display_name": "Python 2",
+      "language": "python",
+      "name": "python2"
+     },
+     "language_info": {
+      "codemirror_mode": {
+       "name": "ipython",
+       "version": 2
+      },
+      "file_extension": ".py",
+      "mimetype": "text/x-python",
+      "name": "python",
+      "nbconvert_exporter": "python",
+      "pygments_lexer": "ipython2",
+      "version": "2.7.6"
+     }
+    }
