@@ -2,13 +2,13 @@ nbformat 4
 nbformat_minor 0
 markdown
     ## Tools for NOAA TMAX Record Frequency Analysis
-code 1
+code 3
     # <help>
   metadata
     {
      "collapsed": true
     }
-code 2
+code 1
     # <api>
     from IPython.display import display, Image
     from IPython.html.widgets import interact_manual
@@ -21,7 +21,7 @@ code 2
     import datetime as dt
     
     ## Use this global variable to specify the path for station summary files.
-    NOAA_STATION_SUMMARY_PATH = ".noaa/hdta/derived/summaries/"
+    NOAA_STATION_SUMMARY_PATH = "/resources/noaa-hdta/data/derived/15mar2015/summaries/"
     
     ## Build Station List
     station_detail_colnames = ['StationID','State','Name',
@@ -45,7 +45,7 @@ code 2
     
     def fetch_station_list():
         station_list = []
-        raw_files = os.path.join('.noaa/hdta/derived/summaries/','','*_sum.csv')
+        raw_files = os.path.join(NOAA_STATION_SUMMARY_PATH,'','*_sum.csv')
         for index, fname in enumerate(glob.glob(raw_files)):
             f = get_filename(fname).split('_')[0]
             station_list.append(str(f))
@@ -197,6 +197,8 @@ code 2
             except Exception as e:
                 print("Widget Error: {0}").format(e.message)
             renderer(station_id, high_rec_freq)
+  stream stderr
+    :0: FutureWarning: IPython widgets are experimental and may change in the future.
   metadata
     {
      "collapsed": false
