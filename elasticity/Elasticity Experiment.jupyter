@@ -1,0 +1,195 @@
+nbformat 4
+nbformat_minor 2
+markdown
+    # Hooke's Law of Elasticity
+    This sample notebook is based on the experiment outlined in Chapter 15 of the book [Computation and Programming in Python](http://mitpress.mit.edu/books/introduction-computation-and-programming-using-python-0).
+    
+    ## Overview
+    Hooke's Law suggests that the force associated with a spring when it is released is linearly related to the distance it has been compressed. 
+    
+    An experiment was conducted to capture data for a number of springs across various compression lengths. The indent of the experiment is demonstrate Hooke's Law by showing that the results of the experiment lie on a straight line. Yet experiment data tends not to be perfect so we expect the results to lie around a curved line not necessary on it. 
+    
+    Could we use the results to fit a model that will allow us to depict the linear premise posited by Hooke? Can we use a linear regression to solve the problem?
+markdown
+    ## Get Data
+    
+    1. [Download](http://mitpress.mit.edu/sites/all/modules/pubdlcnt/pubdlcnt.php?file=/sites/default/files/titles/content/9780262525008_Code.zip&nid=205426) the code that accompanies the aforementioned book. 
+    2. Unzip the downloaded source code
+    3. Drag and Drop the file /codeForWebSite/Chapter 15/springData.txt into the KnowledgeAnyhow Workbench.
+    4. Tag the resulting data item with "samples, linear regression"
+markdown
+    ## Extract, Transform and Load
+    Load the test results from a text file, "springData.txt", and establish an array containing distances and masses.
+code
+    def getData(fileName):
+        dataFile = open(fileName, 'r')
+        distances = []
+        masses = []
+        discardHeader = dataFile.readline()
+        for line in dataFile:
+            d, m = line.split(' ')
+            distances.append(float(d))
+            masses.append(float(m))
+        dataFile.close()
+        return (masses, distances)
+    
+    getData('/resources/springData.txt')
+  metadata
+    {
+     "collapsed": false
+    }
+markdown
+    ## Data Exploration
+    As mentioned, experimental data typically does not result in a straight line. We should plot our sample data to establish a baseline of test results.
+code
+    %matplotlib inline
+  metadata
+    {
+     "collapsed": false
+    }
+code
+    import pylab, random
+    
+    def plotData(inputFile):
+        masses, distances = getData(inputFile)
+        masses = pylab.array(masses)
+        distances = pylab.array(distances)
+        forces = masses*9.81
+        pylab.plot(forces, distances, 'bo',
+                   label = 'Measured displacements')
+        pylab.title('Measured Displacement of Spring')
+        pylab.xlabel('|Force| (Newtons)')
+        pylab.ylabel('Distance (meters)')
+    
+    plotData('/resources/springData.txt')
+  metadata
+    {
+     "collapsed": false
+    }
+markdown
+    ### Observations
+    As expected the results of our experimental data do not depict a perfect slope.
+markdown
+    ## Predictive Analysis
+    How do we determine the best fit line (or curve) that most accurately represents our data while assuming no measurement error? 
+    
+    ### Fit Data
+    A common approach to this problem is to use a **least squares** function to perdict the optimal fit for our data.
+code
+    def fitData(inputFile):
+        masses, distances = getData(inputFile)
+        distances = pylab.array(distances)
+        masses = pylab.array(masses)
+        forces = masses*9.81
+        pylab.plot(forces, distances, 'bo',
+                   label = 'Measured displacements')
+        pylab.title('Measured Displacement of Spring')
+        pylab.xlabel('|Force| (Newtons)')
+        pylab.ylabel('Distance (meters)')
+        #find linear fit
+        a,b = pylab.polyfit(forces, distances, 1)
+        predictedDistances = a*pylab.array(forces) + b
+        k = 1.0/a
+        pylab.plot(forces, predictedDistances,
+                   label = 'Displacements predicted by\nlinear fit, k = '
+                   + str(round(k, 5)))
+        pylab.legend(loc = 'best')
+    
+    fitData('/resources/springData.txt')
+  metadata
+    {
+     "collapsed": false
+    }
+markdown
+    ### Fit Data Observations
+    
+    * Only one test result actually lies on the predicted slope.
+    * This is possible because polyfit() does not attempt to maximize the number points on the line.
+    
+    ### Compare Fit Data
+    
+    Could we improve our predictive slope by using a cubic fit function?
+    
+code
+    def compareFitData(inputFile):
+        masses, distances = getData(inputFile)
+        distances = pylab.array(distances)
+        masses = pylab.array(masses)
+        forces = masses*9.81
+        pylab.plot(forces, distances, 'bo',
+                   label = 'Measured displacements')
+        pylab.title('Measured Displacement of Spring')
+        pylab.xlabel('|Force| (Newtons)')
+        pylab.ylabel('Distance (meters)')
+        #find linear fit
+        a,b = pylab.polyfit(forces, distances, 1)
+        predictedDistances = a*pylab.array(forces) + b
+        k = 1.0/a
+        pylab.plot(forces, predictedDistances,
+                   label = 'Displacements predicted by\nlinear fit, k = '
+                   + str(round(k, 5)))
+        #find cubic fit
+        a,b,c,d = pylab.polyfit(forces, distances, 3)
+        predictedDistances = a*(forces**3) + b*forces**2 + c*forces + d
+        pylab.plot(forces, predictedDistances, 'b:', label = 'cubic fit')
+        pylab.legend(loc = 'best')
+    
+    compareFitData('/resources/springData.txt')
+    
+    
+  metadata
+    {
+     "collapsed": false
+    }
+markdown
+    ### Compare Fit Data Observations
+    
+    Does the fitted cubic curve more accurately represent Hooke's Law which suggested a linear regression? Probably not!
+    
+    ### Reduce to Improve
+    
+    Can we improve the model by eliminating results, such as the last 6 points?
+    
+code
+    def reduceToImprove(inputFile):
+        masses, distances = getData(inputFile)
+        distances = pylab.array(distances[:-6])
+        masses = pylab.array(masses[:-6])
+        forces = masses*9.81
+        pylab.plot(forces, distances, 'bo',
+                   label = 'Measured displacements')
+        pylab.title('Measured Displacement of Spring')
+        pylab.xlabel('|Force| (Newtons)')
+        pylab.ylabel('Distance (meters)')
+        #find linear fit
+        a,b = pylab.polyfit(forces, distances, 1)
+        predictedDistances = a*pylab.array(forces) + b
+        k = 1.0/a
+        pylab.plot(forces, predictedDistances,
+                   label = 'Displacements predicted by\nlinear fit, k = '
+                   + str(round(k, 5)))
+        #find cubic fit
+        a,b,c,d = pylab.polyfit(forces, distances, 3)
+        predictedDistances = a*(forces**3) + b*forces**2 + c*forces + d
+        pylab.plot(forces, predictedDistances, 'b:', label = 'cubic fit')
+        pylab.legend(loc = 'best')
+    
+    reduceToImprove('/resources/springData.txt')
+  metadata
+    {
+     "collapsed": false
+    }
+markdown
+    ### Reduce to Improve Observations
+    
+    Yes the rendering is improved but eliminating data is not a justified action.
+markdown
+    ## Conclusion
+    Based on the predictive modeling explored herein, we could conclude that we lack a sufficient sample set of experimental data to validate Hooke's Law.
+    
+    The reader is encouraged to expand on this data exploration lesson by implementing additional modeling techniques discussed in Chapter 15 of  the book [Computation and Programming in Python](http://mitpress.mit.edu/books/introduction-computation-and-programming-using-python-0).
+metadata
+    {
+     "orig_nbformat": 3,
+     "orig_nbformat_minor": 0
+    }
