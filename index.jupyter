@@ -6,14 +6,14 @@ markdown
     This repository contains sample Jupyter notebooks ranging from tutorials on using popular open source repositories to sample analyses on public data sets to neat notebook hacks.
     
     * [Exploration of Airline On-Time Performance](airline/Exploration%20of%20Airline%20On-Time%20Performance.ipynb)
-    * [Hacker News and AlchemyAPI](hn/Hacker%20News%20and%20AlchemyAPI.ipynb) (see also: [Hacker News Runner](hn/Hacker%20News%20Runner.ipynb))
-    * [Historical Daily Temperature Analysis](noaa/hdta/tmaxfreq/noaaquery_tmaxfreq.ipynb)
+    * [Hacker News and AlchemyAPI](hn/)
+    * [Historical Daily Temperature Analysis](noaa/)
     * [Instaquery](hacks/instaquery.ipynb)
     * [Interactive Data Maps](tax-maps/Interactive%20Data%20Maps.ipynb)
     * [IPy Parallel and R](hacks/IPython%20Parallel%20and%20R.ipynb)
     * [MLB Modern Era Salaries](mlb/mlb-salaries.ipynb)
-    * [Population Growth Estimates](united-nations/world-population/senegal_population_trends.ipynb)
-    * [scikit-learn Recipies](scikit-learn/sklearn_cookbook.ipynb)
+    * [Population Growth Estimates](united-nations/senegal_population_trends.ipynb)
+    * [scikit-learn Recipes](scikit-learn/sklearn_cookbook.ipynb)
     * [Web Server in a Notebook](hacks/Webserver%20in%20a%20Notebook.ipynb)
     
     
