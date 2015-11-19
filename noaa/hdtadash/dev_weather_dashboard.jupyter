@@ -1,0 +1,1109 @@
+nbformat 4
+nbformat_minor 0
+markdown
+    # NOAA Weather Analysis
+    
+    ### Frequency of Daily High and Low Record Temperatures
+  metadata
+    {
+     "urth": {
+      "dashboard": {
+       "layout": {
+        "col": 0,
+        "height": 4,
+        "row": 0,
+        "width": 6
+       }
+      }
+     }
+    }
+markdown
+    >STATUS NOTES:
+    1. Work in progress
+    2. Code works when executed in notebook view manually evaluating cells after each user interaction.
+    3. Eventing for dashboarding view not work.
+    4, Map does not render even though code works using test notebook folium.ipynb
+markdown
+    
+    ## Analysis
+    
+    ### Goal
+    Given historical data for a weather station in the US, what is the frequency for new high or low temperature records?
+    
+    >If there is scientific evidence of extreme fluctuations in our weather patterns due to human impact to the environment, then we should be able to identify significant factual examples of increases in the frequency in extreme temperature changes within the weather station data.
+    
+    There has been a great deal of discussion around climate change and global warming. Since NOAA has made their data public, let us explore the data ourselves and see what insights we can discover. 
+    
+    ### General Analytical Questions
+    
+    1. For each of the possible 365 days of the year that a specific US weather station has gathered data, can we identify the frequency at which daily High and Low temperature records are broken.
+    2. Does the historical *frequency* of daily temperature records (High or Low) in the US provide statistical evidence of dramatic climate change?
+    3. For a given weather station, what is the longest duration of daily temperature record (High or Low) in the US?
+    
+    ### Approach
+    
+    * This analysis is based on a <font color="green">15-March-2015</font> snapshot of the Global Historical Climatology Network (GHCN) dataset.
+    * This analysis leverages **Historical Daily Summary** weather station information that was generated using data derived from [reproducible research](https://github.com/knowledgeanyhow/notebooks/blob/master/noaa/hdta/etl/noaa_hdta_etl.ipynb). This summary data captures information about a given day throughout history at a specific weather station in the US. This dataset contains 365 rows where each row depicts the aggregated low and high record temperatures for a specific day throughout the history of the weather station. 
+    * Each US weather station is associated with a single CSV file that contains historical daily summary data.
+    * All temperatures reported in Fahrenheit.
+  metadata
+    {
+     "urth": {
+      "dashboard": {
+       "layout": {
+        "col": 0,
+        "height": 20,
+        "row": 95,
+        "width": 12
+       }
+      }
+     }
+    }
+markdown
+    ## Environment Setup
+    
+    This noteboook leverages the several Jupyter Incubation Extensions (*urth_components*):
+    
+    * [Declarative Widgets](https://github.com/jupyter-incubator/declarativewidgets) 
+    * [Dynamic Dashboards](https://github.com/jupyter-incubator/dashboards)
+    
+    It also depends on a custom polymer widget:
+    ```
+    urth-raw-html.html
+    ```
+  metadata
+    {
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
+     }
+    }
+markdown
+    ### Import Python Dependencies
+    
+    Depending on the state of your IPython environment, you may need to pre-instal a few dependencies:
+    ```
+        $ pip install seaborn folium
+    ```
+  metadata
+    {
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
+     }
+    }
+code
+    %matplotlib inline
+  metadata
+    {
+     "collapsed": true,
+     "urth": {
+      "dashboard": {}
+     }
+    }
+code
+    import os
+    import struct
+    import glob
+    import pandas as pd
+    import numpy as np
+    import datetime as dt
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    import folium
+    from IPython.display import HTML
+    from IPython.display import Javascript, display
+  metadata
+    {
+     "collapsed": false,
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
+     }
+    }
+markdown
+    ### Load urth components
+  metadata
+    {
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
+     }
+    }
+code
+    %%html
+    <link rel="import" href="urth_components/paper-dropdown-menu/paper-dropdown-menu.html" is='urth-core-import' package='PolymerElements/paper-dropdown-menu'>
+    <link rel="import" href="urth_components/paper-menu/paper-menu.html" is='urth-core-import' package='PolymerElements/paper-menu'>
+    <link rel="import" href="urth_components/paper-item/paper-item.html" is='urth-core-import' package='PolymerElements/paper-item'>
+    <link rel="import" href="urth_components/paper-button/paper-button.html" is='urth-core-import' package='PolymerElements/paper-button'>
+    <link rel="import" href="urth_components/paper-card/paper-card.html" is='urth-core-import' package='PolymerElements/paper-card'>
+    <link rel="import" href="urth_components/paper-slider/paper-slider.html" is='urth-core-import' package='PolymerElements/paper-slider'>
+    <link rel="import" href="urth_components/google-map/google-map.html" is='urth-core-import' package='GoogleWebComponents/google-map'>
+    <link rel="import" href="urth_components/google-map/google-map-marker.html" is='urth-core-import' package='GoogleWebComponents/google-map'>
+    <link rel="import" href="urth_components/urth-viz-table/urth-viz-table.html" is='urth-core-import'>
+    <link rel="import" href="urth_components/urth-viz-chart/urth-viz-chart.html" is='urth-core-import'>
+    <link rel="import" href="./urth-raw-html.html">
+  metadata
+    {
+     "collapsed": false,
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
+     }
+    }
+markdown
+    ### Declare Globals
+  metadata
+    {
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
+     }
+    }
+code
+    DATA_STATE_STATION_LIST = None
+    DATA_STATION_DETAIL_RESULTS = None
+    DATA_FREQUENCY_RESULTS = None
+  metadata
+    {
+     "collapsed": true,
+     "urth": {
+      "dashboard": {}
+     }
+    }
+markdown
+    
+    ### Prepare Filesystem
+    Earlier versions of this notebook stored chart images to disk. We used a specific directory to store plot images (*.png files). However, this approach does not work if the notebook user would like to deploy as a local application. 
+  metadata
+    {
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
+     }
+    }
+code
+    IMAGE_DIRECTORY = "plotit"
+    
+    def image_cleanup(dirname):
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+        else:
+            for filePath in glob.glob(dirname+"/*.png"):
+                if os.path.isfile(filePath):
+                    os.remove(filePath)
+    
+    #image_cleanup(IMAGE_DIRECTORY)
+  metadata
+    {
+     "collapsed": true,
+     "urth": {
+      "dashboard": {}
+     }
+    }
+markdown
+    ## Data Munging
+    
+    In this section of the notebook we will define the necessary data extraction, transformation and loading functions for the desired interactive dashboard.
+  metadata
+    {
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
+     }
+    }
+code
+    # Use this global variable to specify the path for station summary files.
+    NOAA_STATION_SUMMARY_PATH = "/home/jovyan/work/noaa/data/"
+    
+    # Use this global variable to specify the path for the GHCND Station Directory
+    STATION_DETAIL_FILE = '/home/jovyan/work/noaa/data/ghcnd-stations.txt'
+    
+    # Station detail structures for building station lists
+    station_detail_colnames = ['StationID','State','Name',
+                                'Latitude','Longitude','QueryTag']
+    
+    station_detail_rec_template = {'StationID': "",
+                                    'State': "",
+                                    'Name': "",
+                                    'Latitude': "",
+                                    'Longitude': "",
+                                    'QueryTag': ""
+                                    }
+    
+    # -----------------------------------
+    # Station Detail Processing
+    # -----------------------------------
+    def get_filename(pathname):
+        '''Fetch filename portion of pathname.'''
+        plist = pathname.split('/')
+        fname, fext = os.path.splitext(plist[len(plist)-1])
+        return fname
+    
+    def fetch_station_list():
+        '''Return list of available stations given collection of summary files on disk.'''
+        station_list = []
+        raw_files = os.path.join(NOAA_STATION_SUMMARY_PATH,'','*_sum.csv')
+        for index, fname in enumerate(glob.glob(raw_files)):
+            f = get_filename(fname).split('_')[0]
+            station_list.append(str(f))
+        return station_list
+    
+    USA_STATION_LIST = fetch_station_list()
+    
+    def gather_states(fname,stations): 
+        '''Return a list of unique State abbreviations. Weather station data exists for these states.'''
+        state_list = []
+        with open(fname, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+            f.close()
+            for line in lines:
+                r = noaa_gather_station_detail(line,stations)
+                state_list += r
+        df_unique_states = pd.DataFrame(state_list,columns=station_detail_colnames).sort('State').State.unique()
+        return df_unique_states.tolist()
+    
+    def noaa_gather_station_detail(line,slist):
+        '''Build a list of station tuples for stations in the USA.'''
+        station_tuple_list = []
+        station_id_key = line[0:3]
+        if station_id_key == 'USC' or station_id_key == 'USW': 
+            fields = struct.unpack('12s9s10s7s2s30s', line[0:70].encode())
+            if fields[0].decode().strip() in slist:
+                station_tuple = dict(station_detail_rec_template)
+                station_tuple['StationID'] = fields[0].decode().strip()
+                station_tuple['State'] = fields[4].decode().strip()
+                station_tuple['Name'] = fields[5].decode().strip()
+                station_tuple['Latitude'] = fields[1].decode().strip()
+                station_tuple['Longitude'] = fields[2].decode().strip()
+                qt = "{0} at {1} in {2}".format(fields[0].decode().strip(),fields[5].decode().strip(),fields[4].decode().strip())
+                station_tuple['QueryTag'] = qt
+                station_tuple_list.append(station_tuple)
+        return station_tuple_list
+    
+    USA_STATES_WITH_STATIONS = gather_states(STATION_DETAIL_FILE,USA_STATION_LIST)
+    
+    def process_station_detail_for_state(fname,stations,statecode): 
+        '''Return dataframe of station detail for specified state.'''
+        station_list = []
+        with open(fname, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+            f.close()
+            for line in lines:
+                r = noaa_build_station_detail_for_state(line,stations,statecode)
+                station_list += r
+        return pd.DataFrame(station_list,columns=station_detail_colnames)
+    
+    def noaa_build_station_detail_for_state(line,slist,statecode):
+        '''Build a list of station tuples for the specified state in the USA.'''
+        station_tuple_list = []
+        station_id_key = line[0:3]
+        if station_id_key == 'USC' or station_id_key == 'USW':
+            fields = struct.unpack('12s9s10s7s2s30s', line[0:70].encode())
+            if ((fields[0].decode().strip() in slist) and (fields[4].decode().strip() == statecode)): 
+                station_tuple = dict(station_detail_rec_template)
+                station_tuple['StationID'] = fields[0].decode().strip()
+                station_tuple['State'] = fields[4].decode().strip()
+                station_tuple['Name'] = fields[5].decode().strip()
+                station_tuple['Latitude'] = fields[1].decode().strip()
+                station_tuple['Longitude'] = fields[2].decode().strip()
+                qt = "Station {0} in {1} at {2}".format(fields[0].decode().strip(),fields[4].decode().strip(),fields[5].decode().strip())
+                station_tuple['QueryTag'] = qt
+                station_tuple_list.append(station_tuple)
+        return station_tuple_list
+    
+    # We can examine derived station detail data.
+    #process_station_detail_for_state(STATION_DETAIL_FILE,USA_STATION_LIST,"NE")
+  metadata
+    {
+     "collapsed": true,
+     "urth": {
+      "dashboard": {}
+     }
+    }
+markdown
+    ## Exploratory Analysis
+    
+    In this section of the notebook we will define the necessary computational functions for the desired interactive dashboard.
+  metadata
+    {
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
+     }
+    }
+code
+    # -----------------------------------
+    # Station Computation Methods
+    # -----------------------------------
+    
+    month_abbrev = { 1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr',
+                        5: 'May', 6: 'Jun', 7: 'Jul', 8: 'Aug',
+                        9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'
+                    }
+    
+    def compute_years_of_station_data(df):
+        '''Compute years of service for the station.'''
+        yrs = dt.date.today().year-min(df['FirstYearOfRecord'])
+        return yrs
+        
+    def compute_tmax_record_quantity(df,freq):
+        '''Compute number of days where maximum temperature records were greater than frequency factor.'''
+        threshold = int(freq)
+        df_result = df.query('(TMaxRecordCount > @threshold)', engine='python')
+        return df_result
+    
+    def compute_tmin_record_quantity(df,freq):
+        '''Compute number of days where minimum temperature records were greater than frequency factor.'''
+        threshold = int(freq)
+        df_result = df.query('(TMinRecordCount > @threshold)', engine='python')
+        return df_result
+        
+    def fetch_station_data(stationid):
+        '''Return dataframe for station summary file.'''
+        fname = os.path.join(NOAA_STATION_SUMMARY_PATH,'',stationid+'_sum.csv')
+        return pd.DataFrame.from_csv(fname)
+    
+    def create_day_identifier(month,day):
+        '''Return dd-mmm string.'''
+        return str(day)+'-'+month_abbrev[int(month)]
+        
+    def create_date_list(mlist,dlist):
+        '''Return list of formated date strings.'''
+        mv = list(mlist.values())
+        dv = list(dlist.values())
+        new_list = []
+        for index, value in enumerate(mv):
+            new_list.append(create_day_identifier(value,dv[index]))
+        return new_list
+    
+    def create_record_date_list(mlist,dlist,ylist):
+        '''Return list of dates for max/min record events.'''
+        mv = list(mlist.values())
+        dv = list(dlist.values())
+        yv = list(ylist.values())
+        new_list = []
+        for index, value in enumerate(mv):      
+            new_list.append(dt.date(yv[index],value,dv[index]))
+        return new_list
+    
+  metadata
+    {
+     "collapsed": false,
+     "urth": {
+      "dashboard": {}
+     }
+    }
+markdown
+    ## Visualization
+    
+    In this section of the notebook we will define the widgets and supporting functions for the construction of an interactive dashboard. See [Polymer Data Bindings](https://www.polymer-project.org/1.0/docs/devguide/data-binding.html) for more details.
+  metadata
+    {
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
+     }
+    }
+code
+    # Use the Polymer Channel API to establish two-way binding between elements and data.
+    from urth.widgets.widget_channels import channel
+    channel("noaaquery").set("states", USA_STATES_WITH_STATIONS)
+    channel("noaaquery").set("recordTypeOptions", ["Low","High"])
+    channel("noaaquery").set("recordOccuranceOptions", list(range(4, 16)))
+    channel("noaaquery").set("stationList",USA_STATION_LIST)
+    channel("noaaquery").set("stationDetail",STATION_DETAIL_FILE)
+    channel("noaaquery").set("narrationToggleOptions", ["Yes","No"])
+    channel("noaaquery").set("cleanupToggleOptions", ["Yes","No"])
+    channel("noaaquery").set("cleanupPreference", "No")
+    channel("noaaquery").set("displayTypeOptions", ["Data","Map"])
+    channel("noaaquery").set("isNewQuery", "")
+    
+    def reset_settings():
+        channel("noaaquery").set("isNarration", True)
+        channel("noaaquery").set("isMap", True)
+        
+    reset_settings()
+  metadata
+    {
+     "collapsed": true,
+     "urth": {
+      "dashboard": {}
+     }
+    }
+markdown
+    ### Narration Widget
+    Provide some introductory content for the user.
+  metadata
+    {
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
+     }
+    }
+code
+    %%html
+    <a name="narrationdata"></a>
+    <template id="narrationContent" is="urth-core-bind" channel="noaaquery">
+        <template is="dom-if" if="{{isNarration}}">
+            <p>This application allows the user to explore historical NOAA data to observer the actual frequency at which weather stations in the USA have actually experienced new high and low temperature records.</p>
+            <blockquote>Are you able to identify a significant number of temperature changes within the weather station data?</blockquote>
+            <blockquote>Would you consider these results representative of extreme weather changes?</blockquote>
+        </paper-card>
+    </template>
+  metadata
+    {
+     "collapsed": false,
+     "urth": {
+      "dashboard": {
+       "layout": {
+        "col": 6,
+        "height": 8,
+        "row": 11,
+        "width": 6
+       }
+      }
+     }
+    }
+markdown
+    ### Weather Channel Widget
+    Display the current USA national weather map.
+  metadata
+    {
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
+     }
+    }
+code
+    %%html
+    <template id="weatherchannel_currentusamap" is="urth-core-bind" channel="noaaquery">
+        <div id="wc_curmap">
+            <center><embed src="http://i.imwx.com/images/maps/current/curwx_600x405.jpg" width="500" height="300"></center>
+        <div id="wc_map">
+    </template>
+  metadata
+    {
+     "collapsed": false,
+     "urth": {
+      "dashboard": {
+       "layout": {
+        "col": 6,
+        "height": 11,
+        "row": 0,
+        "width": 6
+       }
+      }
+     }
+    }
+markdown
+    ### Preferences Widget
+    
+    This *composite widget* allows the user to control several visualization switches:
+    
+    * **Narration**: This dropdown menu allows the user to hide/show narrative content within the dashboard.
+    * **Display Type**: This dropdown menu allows the user to toggle between geospacial and raw data visualizations.
+    * **Storage Management**: This dropdown menu allows the user to toggle the frequency of storage cleanup.
+  metadata
+    {
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
+     }
+    }
+code
+    def process_preferences(narrativepref,viewpref):
+        if narrativepref == "Yes":
+            channel("noaaquery").set("isNarration", True)
+        else:
+            channel("noaaquery").set("isNarration","")
+        if viewpref == "Map":
+            channel("noaaquery").set("isMap", True)
+        else:
+            channel("noaaquery").set("isMap", "")
+        return
+  metadata
+    {
+     "collapsed": true,
+     "urth": {
+      "dashboard": {}
+     }
+    }
+code
+    %%html
+    <a name="prefsettings"></a>
+    <template id="setPreferences" is="urth-core-bind" channel="noaaquery">
+        <urth-core-function id="applySettingFunc" 
+            ref="process_preferences" 
+            arg-narrativepref="{{narrationPreference}}"
+            arg-viewpref="{{displayPreference}}" auto>
+        </urth-core-function>
+        <paper-card heading="Preferences" elevation="1">
+            <div class="card-content">
+                <p class="widget">Select a narration preference to toggle informative content.
+                <paper-dropdown-menu label="Show Narration" selected-item-label="{{narrationPreference}}" noink>
+                    <paper-menu class="dropdown-content" selected="[[narrationPreference]]" attr-for-selected="label">
+                        <template is="dom-repeat" items="[[narrationToggleOptions]]">
+                            <paper-item label="[[item]]">[[item]]</paper-item>
+                        </template>
+                    </paper-menu>
+                </paper-dropdown-menu></p>
+                <p class="widget">Would you like a geospacial view of a selected weather station?
+                <paper-dropdown-menu label="Select Display Type" selected-item-label="{{displayPreference}}" noink>
+                    <paper-menu class="dropdown-content" selected="[[displayPreference]]" attr-for-selected="label">
+                        <template is="dom-repeat" items="[[displayTypeOptions]]">
+                            <paper-item label="[[item]]">[[item]]</paper-item>
+                        </template>
+                    </paper-menu>
+                </paper-dropdown-menu></p>
+                <p class="widget">Would you like to purge disk storage more frequently?
+                <paper-dropdown-menu label="Manage Storage" selected-item-label="{{cleanupPreference}}" noink>
+                    <paper-menu class="dropdown-content" selected="[[cleanupPreference]]" attr-for-selected="label">
+                        <template is="dom-repeat" items="[[cleanupToggleOptions]]">
+                            <paper-item label="[[item]]">[[item]]</paper-item>
+                        </template>
+                    </paper-menu>
+                </paper-dropdown-menu></p>
+            </div>
+        </paper-card>
+    </template>
+  metadata
+    {
+     "collapsed": false,
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
+     }
+    }
+markdown
+    ### Dashboard Control Widget
+    
+    This *composite widget* allows the user to control several visualization switches:
+    
+    * **State Selector**: This dropdown menu allows the user to select a state for analysis. Only the data associated with the selected state will be loaded. 
+    * **Record Type**: This dropdown menu allows the user focus the analysis on either *High* or *Low* records.
+    * **Occurance Factor**: This dropdown menu allows the user to specify the minimum number of new record events for a given calendar day. 
+    
+    The widget uses a control method to manage interactive events.
+  metadata
+    {
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
+     }
+    }
+code
+    def process_query(fname,stations,statecode,cleanuppref):
+        global DATA_STATE_STATION_LIST
+        reset_settings()
+        if cleanuppref == "Yes":
+            image_cleanup(IMAGE_DIRECTORY)
+        DATA_STATE_STATION_LIST = process_station_detail_for_state(fname,stations,statecode)
+        channel("noaaquery").set("isNewQuery", True)
+        return DATA_STATE_STATION_LIST
+    
+    # We can examine stations per state data.
+    #process_query(STATION_DETAIL_FILE,USA_STATION_LIST,"NE","No")
+  metadata
+    {
+     "collapsed": false,
+     "urth": {
+      "dashboard": {}
+     }
+    }
+code
+    %%html
+    <a name="loaddata"></a>
+    <template id="loadCard" is="urth-core-bind" channel="noaaquery">
+        <urth-core-function id="loadDataFunc" 
+            ref="process_query" 
+            arg-fname="{{stationDetail}}"
+            arg-stations="{{stationList}}"
+            arg-statecode="{{stateAbbrev}}"
+            arg-cleanuppref="{{cleanupPreference}}"
+            result="{{stationQueryResult}}"
+            is-ready="{{isloadready}}">
+        </urth-core-function>
+        <paper-card heading="Query Preferences" elevation="1">
+            <div class="card-content">
+                <div>
+                    <p class="widget">Which region of weather stations in the USA do you wish to examine?.</p>
+                    <paper-dropdown-menu label="Select State" selected-item-label="{{stateAbbrev}}" noink>
+                        <paper-menu class="dropdown-content" selected="{{stateAbbrev}}" attr-for-selected="label">
+                            <template is="dom-repeat" items="[[states]]">
+                                <paper-item label="[[item]]">[[item]]</paper-item>
+                            </template>
+                        </paper-menu>
+                    </paper-dropdown-menu>
+                </div>
+                <div>
+                    <p class="widget">Are you interested in daily minimum or maximum temperature records per station?.</p>
+                    <paper-dropdown-menu label="Select Record Type" selected-item-label="{{recType}}" noink>
+                        <paper-menu class="dropdown-content" selected="[[recType]]" attr-for-selected="label">
+                            <template is="dom-repeat" items="[[recordTypeOptions]]">
+                                <paper-item label="[[item]]">[[item]]</paper-item>
+                            </template>
+                        </paper-menu>
+                    </paper-dropdown-menu>
+                </div>
+                <div>
+                    <p class="widget">Each weather station has observed more than one new minimum or maximum temperature record event. How many new record occurrences would you consider significant enough to raise concerns about extreme weather fluctuations?.</p>
+                    <paper-dropdown-menu label="Select Occurrence Factor" selected-item-label="{{occurrenceFactor}}" noink>
+                        <paper-menu class="dropdown-content" selected="[[occurrenceFactor]]" attr-for-selected="label">
+                            <template is="dom-repeat" items="[[recordOccuranceOptions]]">
+                                <paper-item label="[[item]]">[[item]]</paper-item>
+                            </template>
+                        </paper-menu>
+                    </paper-dropdown-menu>
+                </div>
+            </div>
+            <div class="card-actions">
+                <paper-button tabindex="0" disabled="{{!isloadready}}" onClick="loadDataFunc.invoke()">Apply</paper-button>
+            </div>
+        </paper-card>
+    </template
+  metadata
+    {
+     "collapsed": false,
+     "urth": {
+      "dashboard": {
+       "layout": {
+        "col": 0,
+        "height": 15,
+        "row": 4,
+        "width": 6
+       }
+      }
+     }
+    }
+markdown
+    ### Channel Monitor Widget
+    
+    This widget provides status information pertaining to properties of the dashboard.
+  metadata
+    {
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
+     }
+    }
+code
+    %%html
+    <template id="channelMonitorWidget" is="urth-core-bind" channel="noaaquery">
+        <h2 class="widget">Channel Monitor</h2>
+        <p class="widget"><b>Query Selections:</b></p>
+        <table border="1" align="center">
+            <tr>
+                <th>Setting</th>
+                <th>Value</th>
+            </tr>
+            <tr>
+                <td>State</td>
+                <td>{{stateAbbrev}}</td>
+            </tr>
+            <tr>
+                <td>Record Type</td>
+                <td>{{recType}}</td>
+            </tr>
+            <tr>
+                <td>Occurance Factor</td>
+                <td>{{occurrenceFactor}}</td>
+            </tr>
+            <tr>
+                <td>Station ID</td>
+                <td>{{station.0}}</td>
+            </tr>
+            <tr>
+                <td>Narration</td>
+                <td>{{isNarration}}</td>
+            </tr>
+            <tr>
+                <td>Map View</td>
+                <td>{{isMap}}</td>
+            </tr>
+        </table>
+        <p class="widget">{{recType}} temperature record analysis using historical NOAA data from weather {{station.5}}.</p>
+    </template>
+  metadata
+    {
+     "collapsed": false,
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
+     }
+    }
+markdown
+    ### Station Detail Widget
+    
+    This *composite widget* allows the user view station details for the selected state. Tabluar and map viewing options are available.
+    
+  metadata
+    {
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
+     }
+    }
+code
+    # Use Python to generate a Folium Map with Markers for each weather station in the selected state.
+    def display_map(m, height=500):
+        '''Takes a folium instance and embed HTML.'''
+        m._build_map()
+        srcdoc = m.HTML.replace('"', '&quot;')
+        embed = '<iframe srcdoc="{0}" style="width: 100%; height: {1}px; border: none"></iframe>'.format(srcdoc, height)
+        return embed
+    
+    def render_map(height=500):
+        '''Generate a map based on a dateframe of station detail.'''
+        df = DATA_STATE_STATION_LIST   
+        centerpoint_latitude = np.mean(df.Latitude.astype(float))
+        centerpoint_longitude = np.mean(df.Longitude.astype(float))
+        map_obj = folium.Map(location=[centerpoint_latitude, centerpoint_longitude],zoom_start=6)
+        for index, row in df.iterrows():
+            map_obj.simple_marker([row.Latitude, row.Longitude], popup=row.QueryTag) 
+        map_doc = display_map(map_obj)
+        channel("noaaquery").set("stationmap", map_doc)
+        return map_doc
+    
+    # We can examine the generated HTML for the dynamic map
+    #render_map()
+  metadata
+    {
+     "collapsed": false,
+     "scrolled": false,
+     "urth": {
+      "dashboard": {}
+     }
+    }
+code
+    %%html
+    <template id="station_detail_combo_widget" is="urth-core-bind" channel="noaaquery">
+        <template is="dom-if" if="{{isNewQuery}}">
+            <paper-card style="width: 100%;" heading="{{stateAbbrev}} Weather Stations" elevation="1">
+                <p>These are the weather stations monitoring local conditions. Select a station to explore historical record temperatures.</p>
+                <urth-viz-table datarows="{{ stationQueryResult.data }}" selection="{{station}}" columns="{{ stationQueryResult.columns }}" rows-visible=20>
+                </urth-viz-table>
+            </paper-card>
+            <urth-core-function id="renderFoliumMapFunc" 
+                ref="render_map"
+                result="{{foliumMap}}" auto>
+            </urth-core-function>
+            <div>
+                <template is="dom-if" if="{{isNewMap}}">
+                    <urth-raw-html html="{{stationmap}}"/>
+                </template>
+            </div>
+        </template>
+    </template>
+  metadata
+    {
+     "collapsed": false,
+     "urth": {
+      "dashboard": {
+       "layout": {
+        "col": 0,
+        "height": 25,
+        "row": 19,
+        "width": 12
+       }
+      }
+     }
+    }
+markdown
+    ### Station Summary Widget
+    
+    This widget provides the user with a glimpse into the historic hi/low record data for the selected station.
+  metadata
+    {
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
+     }
+    }
+code
+    def explore_station_data(station):
+        global DATA_STATION_DETAIL_RESULTS
+        df_station_detail = fetch_station_data(station)
+        channel("noaaquery").set("yearsOfService", compute_years_of_station_data(df_station_detail))
+        DATA_STATION_DETAIL_RESULTS = df_station_detail
+        display(Javascript("exploreStationDataFunc.invoke()"))
+        return df_station_detail
+  metadata
+    {
+     "collapsed": true,
+     "urth": {
+      "dashboard": {}
+     }
+    }
+code
+    %%html
+    <template id="station_summary_widget" is="urth-core-bind" channel="noaaquery">
+        <urth-core-function id="exploreStationDataFunc" 
+            ref="explore_station_data"
+            arg-station="[[station.0]]"
+            result="{{stationSummaryResult}}" auto>
+        </urth-core-function>
+        <paper-card style="width: 100%;" heading="Station Summary" elevation="1">
+             <template is="dom-if" if="{{stationSummaryResult}}">
+                <p>{{recType}} temperature record analysis using historical NOAA data from weather {{station.5}}.</p>
+                <p>This weather station has been in service and collecting data for {{yearsOfService}} years.</p>
+                <urth-viz-table datarows="{{ stationSummaryResult.data }}" selection="{{dayAtStation}}" columns="{{ stationSummaryResult.columns }}" rows-visible=20>
+                </urth-viz-table>
+            </template>
+        </paper-card> 
+    </template>
+  metadata
+    {
+     "collapsed": false,
+     "urth": {
+      "dashboard": {
+       "layout": {
+        "col": 0,
+        "height": 18,
+        "row": 44,
+        "width": 12
+       }
+      }
+     }
+    }
+markdown
+    ### Temperature Record Analysis for Selected Station
+    
+    This widget provides the user with insights for selected station.
+  metadata
+    {
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
+     }
+    }
+code
+    def plot_record_results(rectype,fname=None):
+        df = DATA_FREQUENCY_RESULTS
+        plt.figure(figsize = (9,9), dpi = 72)
+        if rectype == "High":
+            dates = create_record_date_list(df.Month.to_dict(),
+                                            df.Day.to_dict(),
+                                            df.TMaxRecordYear.to_dict()
+                                           )
+            temperatureRecordsPerDate = {'RecordDate' : pd.Series(dates,index=df.index),
+                                          'RecordHighTemp' : pd.Series(df.TMax.to_dict(),index=df.index)
+                                         }
+            df_new = pd.DataFrame(temperatureRecordsPerDate)
+            sns_plot = sns.factorplot(x="RecordDate", y="RecordHighTemp", kind="bar", data=df_new, size=6, aspect=1.5)
+            sns_plot.set_xticklabels(rotation=30)
+        else:
+            dates = create_record_date_list(df.Month.to_dict(),
+                                            df.Day.to_dict(),
+                                            df.TMinRecordYear.to_dict()
+                                           )
+            temperatureRecordsPerDate = {'RecordDate' : pd.Series(dates,index=df.index),
+                                          'RecordLowTemp' : pd.Series(df.TMin.to_dict(),index=df.index)
+                                         }
+            df_new = pd.DataFrame(temperatureRecordsPerDate)
+            sns_plot = sns.factorplot(x="RecordDate", y="RecordLowTemp", kind="bar", data=df_new, size=6, aspect=1.5)
+            sns_plot.set_xticklabels(rotation=30)
+        if fname is not None:
+            if os.path.isfile(fname):
+                os.remove(fname)
+            sns_plot.savefig(fname)
+        channel("noaaquery").set("recordQueryResults", df_new)
+        return sns_plot.fig
+    
+    def compute_record_durations(df,rectype):
+        '''Return dataframe of max/min temperature record durations for each day.'''
+        dates = create_date_list(df.Month.to_dict(),df.Day.to_dict())
+        s_dates = pd.Series(dates)
+        if rectype == "High":
+            s_values = pd.Series(df.MaxDurTMaxRecord.to_dict(),index=df.index)
+        else:
+            s_values = pd.Series(df.MaxDurTMinRecord.to_dict(),index=df.index)
+        temperatureDurationsPerDate = {'RecordDate' : pd.Series(dates,index=df.index),
+                                      'RecordLowTemp' : s_values
+                                     }
+        df_new = pd.DataFrame(temperatureDurationsPerDate)
+        return df_new
+    
+    def plot_duration_results(rectype,fname=None):
+        df_durations = compute_record_durations(DATA_FREQUENCY_RESULTS,rectype)
+        fig = plt.figure(figsize = (9,9), dpi = 72)
+        plt.xlabel('Day')
+        plt.ylabel('Record Duration in Years')
+        if rectype == "High":
+            plt.title('Maximum Duration for TMax Records')
+        else:
+            plt.title('Maximum Duration for TMin Records')
+        ax = plt.gca()
+        colors= ['r', 'b']
+        df_durations.plot(kind='bar',color=colors, alpha=0.75, ax=ax)
+        ax.xaxis.set_ticklabels( ['%s'  % i for i in df_durations.RecordDate.values] )
+        plt.grid(b=True, which='major', linewidth=1.0)
+        plt.grid(b=True, which='minor')
+        if fname is not None:
+            if os.path.isfile(fname):
+                os.remove(fname)
+            plt.savefig(fname)
+        channel("noaaquery").set("durationResults", df_durations)
+        return fig
+  metadata
+    {
+     "collapsed": false,
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
+     }
+    }
+code
+    def explore_record_temperature_frequency(rectype,recfreqfactor):
+        global DATA_FREQUENCY_RESULTS
+        channel("noaaquery").set("isAboveFreqFactor", True)
+        channel("noaaquery").set("frequencyResultsAvailable", "")
+        channel("noaaquery").set("numberRecordDays", 0)    
+        if rectype == "High":
+            df_record_days = compute_tmax_record_quantity(DATA_STATION_DETAIL_RESULTS,recfreqfactor)
+        else:
+            df_record_days = compute_tmin_record_quantity(DATA_STATION_DETAIL_RESULTS,recfreqfactor)
+        if not df_record_days.empty:
+            channel("noaaquery").set("numberRecordDays", len(df_record_days))
+            DATA_FREQUENCY_RESULTS = df_record_days
+            channel("noaaquery").set("frequencyResultsAvailable", True)
+        else:
+            channel("noaaquery").set("isAboveFreqFactor", "")    
+        display(Javascript("stationRecordFreqFunc.invoke()"))
+        return df_record_days
+  metadata
+    {
+     "collapsed": false,
+     "urth": {
+      "dashboard": {}
+     }
+    }
+code
+    %%html
+    <template id="station_synopsis_widget" is="urth-core-bind" channel="noaaquery">
+        <urth-core-function id="stationRecordFreqFunc"
+            ref="explore_record_temperature_frequency" 
+            arg-rectype="[[recType]]"
+            arg-recfreqfactor="[[occurrenceFactor]]"
+            result="{{stationFreqRecordsResult}}" auto>
+        </urth-core-function>
+        <template is="dom-if" if="{{stationFreqRecordsResult}}">
+            <paper-card style="width: 100%;" heading="Temperature Record Analysis" elevation="1">
+                <p>This station has experienced {{numberRecordDays}} days of new {{recType}} records where a new record has been set more than {{occurrenceFactor}} times throughout the operation of the station.</p>
+                <urth-viz-table datarows="{{ stationFreqRecordsResult.data }}" selection="{{dayAtStation}}" columns="{{ stationFreqRecordsResult.columns }}" rows-visible=20>
+                </urth-viz-table>
+                <template is="dom-if" if="{{isAboveFreqFactor}}">
+                    <urth-core-function id="stationRecordsFunc" 
+                        ref="plot_record_results"
+                        arg-rectype="[[recType]]"
+                        result="{{stationRecordsPlot}}" auto>
+                    </urth-core-function>
+                    <urth-core-function id="stationDurationsFunc" 
+                        ref="plot_duration_results"
+                        arg-rectype="[[recType]]"
+                        result="{{stationDurationsPlot}}" auto>
+                    </urth-core-function>
+                    <paper-card heading="Station {{station.0}} Records Per Day" elevation="0">
+                        <p>The current {{recType}} temperature record for each day that has experienced more than {{occurrenceFactor}} new record events since the station has come online.</p>
+                        <img src="{{stationRecordsPlot}}"/><br/>
+                    </paper-card>
+                    <paper-card heading="Duration of Station {{station.0}} Records Per Day" elevation="0">
+                        <p>For each day that has experienced more than {{occurrenceFactor}} {{recType}} temperature records, some days have had records stand for a large portion of the life of the station.</p>
+                        <img src="{{stationDurationsPlot}}"/>
+                    </paper-card>
+                </template>
+                <template is="dom-if" if="{{!isAboveFreqFactor}}">
+                    <p>This weather station has not experienced any days with greater than {{occurrenceFactor}} new {{recType}} records.</p>
+                </template>
+            </paper-card> 
+        </template>
+    </template>
+  metadata
+    {
+     "collapsed": false,
+     "urth": {
+      "dashboard": {
+       "layout": {
+        "col": 0,
+        "height": 33,
+        "row": 62,
+        "width": 12
+       }
+      }
+     }
+    }
+markdown
+    ## Conclusion
+    
+    It seems that most weather stations in the USA are less than 130 years old and few have experienced a significant number of max/min record temperature events. There is also a far amount of evidence of records lasting for decades.
+    
+    ### Resources
+    
+    1. This analytical notebook is a component of a [package of notebooks](https://github.com/knowledgeanyhow/notebooks/tree/master/noaa/hdta). The package is intended to serve as an exercise in the applicability of IPython/Juypter Notebooks to public weather data for DIY Analytics.
+    2. The Global Historical Climatology Network (GHCN) - [Daily dataset](http://gis.ncdc.noaa.gov/all-records/catalog/search/resource/details.page?id=gov.noaa.ncdc:C00861) integrates daily climate observations from approximately 30 different data sources. Over 25,000 worldwide weather stations are regularly updated with observations from within roughly the last month. 
+    
+    ### Citation Information
+    
+    * [GHCN-Daily journal article](doi:10.1175/JTECH-D-11-00103.1): Menne, M.J., I. Durre, R.S. Vose, B.E. Gleason, and T.G. Houston, 2012:  An overview of the Global Historical Climatology Network-Daily Database.  Journal of Atmospheric and Oceanic Technology, 29, 897-910.
+    * Menne, M.J., I. Durre, B. Korzeniewski, S. McNeal, K. Thomas, X. Yin, S. Anthony, R. Ray, R.S. Vose, B.E.Gleason, and T.G. Houston, 2012: [Global Historical Climatology Network - Daily (GHCN-Daily)](http://doi.org/10.7289/V5D21VHZ), [Version 3.20-upd-2015031605], NOAA National Climatic Data Center [March 16, 2015].
+  metadata
+    {
+     "urth": {
+      "dashboard": {
+       "layout": {
+        "col": 0,
+        "height": 14,
+        "row": 115,
+        "width": 12
+       }
+      }
+     }
+    }
+metadata
+    {
+     "kernelspec": {
+      "display_name": "Python 3",
+      "language": "python",
+      "name": "python3"
+     },
+     "language_info": {
+      "codemirror_mode": {
+       "name": "ipython",
+       "version": 3
+      },
+      "file_extension": ".py",
+      "mimetype": "text/x-python",
+      "name": "python",
+      "nbconvert_exporter": "python",
+      "pygments_lexer": "ipython3",
+      "version": "3.4.3"
+     },
+     "urth": {
+      "dashboard": {
+       "cellMargin": 10,
+       "defaultCellHeight": 20,
+       "maxColumns": 12
+      }
+     }
+    }
