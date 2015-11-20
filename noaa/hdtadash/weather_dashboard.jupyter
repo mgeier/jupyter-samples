@@ -10,10 +10,22 @@ markdown
       "dashboard": {
        "layout": {
         "col": 0,
-        "height": 5,
+        "height": 4,
         "row": 0,
         "width": 6
        }
+      }
+     }
+    }
+markdown
+    >STATUS NOTES:
+    1. all works using urth-core-watch patch and a few hacks.
+    2. ToDo: revisit code after v0.1.1 is released.
+  metadata
+    {
+     "urth": {
+      "dashboard": {
+       "hidden": true
       }
      }
     }
@@ -47,7 +59,7 @@ markdown
        "layout": {
         "col": 0,
         "height": 20,
-        "row": 144,
+        "row": 131,
         "width": 12
        }
       }
@@ -108,11 +120,14 @@ code
     import seaborn as sns
     import folium
     from IPython.display import HTML
+    from IPython.display import Javascript, display
   metadata
     {
      "collapsed": false,
      "urth": {
-      "dashboard": {}
+      "dashboard": {
+       "hidden": true
+      }
      }
     }
 markdown
@@ -137,7 +152,10 @@ code
     <link rel="import" href="urth_components/google-map/google-map-marker.html" is='urth-core-import' package='GoogleWebComponents/google-map'>
     <link rel="import" href="urth_components/urth-viz-table/urth-viz-table.html" is='urth-core-import'>
     <link rel="import" href="urth_components/urth-viz-chart/urth-viz-chart.html" is='urth-core-import'>
+    <!-- Add custom Polymer Widget for injecting raw HTML into a urth-core widget -->
     <link rel="import" href="./urth-raw-html.html">
+    <!-- HACK: Use Property Watch patch for v0.1.0 of declarativewidgets; This can be removed for v0.1.1 -->
+    <link rel="import" href="./urth-core-watch.html">
   metadata
     {
      "collapsed": false,
@@ -169,8 +187,42 @@ code
      }
     }
 markdown
-    
     ### Prepare Filesystem
+    
+    #### Data Preparation Options
+    
+    1. Use the [NOAA data Munging](https://github.com/ibm-et/jupyter-samples/tree/master/noaa/etl) project to generate CSV files for the latest NOAA data.
+    2. Use the sample **March 16, 2015** snapshot provided in this repo and do one of the following:
+    
+        * Open a terminal session and run these commands:
+        
+        ```
+        cd /home/main/notebooks/noaa/hdtadash/data/
+        tar -xvf station_summaries.tar
+        ```
+        
+        * Enable, execute and then disable the following bash cell 
+  metadata
+    {
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
+     }
+    }
+raw
+    %%bash
+    cd /home/main/notebooks/noaa/hdtadash/data/
+    tar -xvf station_summaries.tar
+  metadata
+    {
+     "urth": {
+      "dashboard": {}
+     }
+    }
+markdown
+    #### Plot Storage
+    
     Earlier versions of this notebook stored chart images to disk. We used a specific directory to store plot images (*.png files). However, this approach does not work if the notebook user would like to deploy as a local application. 
   metadata
     {
@@ -213,10 +265,10 @@ markdown
     }
 code
     # Use this global variable to specify the path for station summary files.
-    NOAA_STATION_SUMMARY_PATH = "/home/jovyan/work/noaa/data/"
+    NOAA_STATION_SUMMARY_PATH = "/home/main/notebooks/noaa/hdtadash/data/"
     
     # Use this global variable to specify the path for the GHCND Station Directory
-    STATION_DETAIL_FILE = '/home/jovyan/work/noaa/data/ghcnd-stations.txt'
+    STATION_DETAIL_FILE = '/home/main/notebooks/noaa/hdtadash/data/ghcnd-stations.txt'
     
     # Station detail structures for building station lists
     station_detail_colnames = ['StationID','State','Name',
@@ -315,7 +367,7 @@ code
     #process_station_detail_for_state(STATION_DETAIL_FILE,USA_STATION_LIST,"NE")
   metadata
     {
-     "collapsed": true,
+     "collapsed": false,
      "urth": {
       "dashboard": {}
      }
@@ -394,18 +446,6 @@ code
       "dashboard": {}
      }
     }
-markdown
-    ## Visualization
-    
-    In this section of the notebook we will define the widgets and supporting functions for the construction of an interactive dashboard. See [Polymer Data Bindings](https://www.polymer-project.org/1.0/docs/devguide/data-binding.html) for more details.
-  metadata
-    {
-     "urth": {
-      "dashboard": {
-       "hidden": true
-      }
-     }
-    }
 code
     # Use the Polymer Channel API to establish two-way binding between elements and data.
     from urth.widgets.widget_channels import channel
@@ -418,13 +458,31 @@ code
     channel("noaaquery").set("cleanupToggleOptions", ["Yes","No"])
     channel("noaaquery").set("cleanupPreference", "No")
     channel("noaaquery").set("displayTypeOptions", ["Data","Map"])
-    channel("noaaquery").set("isNarration", True)
-    channel("noaaquery").set("isMap", True)
+    
+    def reset_settings():
+        channel("noaaquery").set("isNarration", True)
+        channel("noaaquery").set("isMap", True)
+        channel("noaaquery").set("isNewQuery", True)
+        channel("noaaquery").set("stationResultsReady", "")
+        
+    reset_settings()
   metadata
     {
      "collapsed": true,
      "urth": {
       "dashboard": {}
+     }
+    }
+markdown
+    ## Visualization
+    
+    In this section of the notebook we will define the widgets and supporting functions for the construction of an interactive dashboard. See [Polymer Data Bindings](https://www.polymer-project.org/1.0/docs/devguide/data-binding.html) for more details.
+  metadata
+    {
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
      }
     }
 markdown
@@ -456,7 +514,7 @@ code
        "layout": {
         "col": 6,
         "height": 8,
-        "row": 0,
+        "row": 11,
         "width": 6
        }
       }
@@ -487,8 +545,8 @@ code
       "dashboard": {
        "layout": {
         "col": 6,
-        "height": 12,
-        "row": 8,
+        "height": 11,
+        "row": 0,
         "width": 6
        }
       }
@@ -598,7 +656,9 @@ code
         global DATA_STATE_STATION_LIST
         if cleanuppref == "Yes":
             image_cleanup(IMAGE_DIRECTORY)
+        reset_settings()
         DATA_STATE_STATION_LIST = process_station_detail_for_state(fname,stations,statecode)
+        channel("noaaquery").set("stationResultsReady", True)
         return DATA_STATE_STATION_LIST
     
     # We can examine stations per state data.
@@ -669,7 +729,7 @@ code
        "layout": {
         "col": 0,
         "height": 15,
-        "row": 5,
+        "row": 4,
         "width": 6
        }
       }
@@ -692,7 +752,7 @@ code
     <template id="channelMonitorWidget" is="urth-core-bind" channel="noaaquery">
         <h2 class="widget">Channel Monitor</h2>
         <p class="widget"><b>Query Selections:</b></p>
-        <table border="1" alighn="center">
+        <table border="1" align="center">
             <tr>
                 <th>Setting</th>
                 <th>Value</th>
@@ -758,13 +818,11 @@ code
     def render_map(height=500):
         '''Generate a map based on a dateframe of station detail.'''
         df = DATA_STATE_STATION_LIST   
-        #channel("noaaquery").set("stationMapAvailable", "")
         centerpoint_latitude = np.mean(df.Latitude.astype(float))
         centerpoint_longitude = np.mean(df.Longitude.astype(float))
         map_obj = folium.Map(location=[centerpoint_latitude, centerpoint_longitude],zoom_start=6)
         for index, row in df.iterrows():
-            map_obj.simple_marker([row.Latitude, row.Longitude], popup=row.QueryTag)  
-        channel("noaaquery").set("isMap", True)
+            map_obj.simple_marker([row.Latitude, row.Longitude], popup=row.QueryTag) 
         return display_map(map_obj)
     
     # We can examine the generated HTML for the dynamic map
@@ -772,28 +830,54 @@ code
   metadata
     {
      "collapsed": false,
+     "scrolled": false,
      "urth": {
       "dashboard": {}
+     }
+    }
+markdown
+    ##### HACK: urth-core-watch seems to misbehave when combined with output elements. The workaround is to split the widget into two.
+  metadata
+    {
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
+     }
+    }
+code
+    %%html
+    <template id="station_detail_combo_func" is="urth-core-bind" channel="noaaquery">
+        <urth-core-watch value="{{stationResultsReady}}">
+            <urth-core-function id="renderFoliumMapFunc" 
+                ref="render_map"
+                result="{{foliumMap}}" auto>
+            </urth-core-function>
+        </urth-core-watch>
+    </template>
+  metadata
+    {
+     "collapsed": false,
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
      }
     }
 code
     %%html
     <template id="station_detail_combo_widget" is="urth-core-bind" channel="noaaquery">
-        <urth-core-function id="renderFoliumMapFunc" 
-            ref="render_map"
-            result="{{foliumMap}}" auto>
-        </urth-core-function>
-        <template is="dom-if" if="{{stationQueryResult}}">
-            <paper-card style="width: 100%;" heading="Statewide Stations" elevation="1">
-                <p>These are the weather stations monitoring local conditions. Select a station to explore historical record temperatures.</p>
-                <urth-viz-table datarows="{{ stationQueryResult.data }}" selection="{{station}}" columns="{{ stationQueryResult.columns }}" rows-visible=20>
-                </urth-viz-table>
-            </paper-card>
-            <div>
-                <template is="dom-if" if="{{isMap}}">
+        <paper-card style="width: 100%;" heading="{{stateAbbrev}} Weather Stations" elevation="1">
+            <p>These are the weather stations monitoring local conditions. Select a station to explore historical record temperatures.</p>
+            <urth-viz-table datarows="{{ stationQueryResult.data }}" selection="{{station}}" columns="{{ stationQueryResult.columns }}" rows-visible=20>
+            </urth-viz-table>
+        </paper-card>
+        <template is="dom-if" if="{{isNewQuery}}">
+            <template is="dom-if" if="{{isMap}}">
+                <div>
                     <urth-raw-html html="{{foliumMap}}"/>
-                </template>
-            </div>
+                </div>
+            </template>
         </template>
     </template>
   metadata
@@ -803,8 +887,8 @@ code
       "dashboard": {
        "layout": {
         "col": 0,
-        "height": 37,
-        "row": 20,
+        "height": 39,
+        "row": 19,
         "width": 12
        }
       }
@@ -814,6 +898,64 @@ markdown
     ### Station Summary Widget
     
     This widget provides the user with a glimpse into the historic hi/low record data for the selected station.
+  metadata
+    {
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
+     }
+    }
+code
+    def explore_station_data(station):
+        global DATA_STATION_DETAIL_RESULTS
+        df_station_detail = fetch_station_data(station)
+        channel("noaaquery").set("yearsOfService", compute_years_of_station_data(df_station_detail))
+        DATA_STATION_DETAIL_RESULTS = df_station_detail
+        #display(Javascript("stationRecordFreqFunc.invoke()"))
+        return df_station_detail
+  metadata
+    {
+     "collapsed": true,
+     "urth": {
+      "dashboard": {}
+     }
+    }
+code
+    %%html
+    <template id="station_summary_widget" is="urth-core-bind" channel="noaaquery">
+        <urth-core-function id="exploreStationDataFunc" 
+            ref="explore_station_data"
+            arg-station="[[station.0]]"
+            result="{{stationSummaryResult}}" auto>
+        </urth-core-function>
+        <paper-card style="width: 100%;" heading="Station Summary" elevation="1">
+             <template is="dom-if" if="{{stationSummaryResult}}">
+                <p>{{recType}} temperature record analysis using historical NOAA data from weather {{station.5}}.</p>
+                <p>This weather station has been in service and collecting data for {{yearsOfService}} years.</p>
+                <urth-viz-table datarows="{{ stationSummaryResult.data }}" selection="{{dayAtStation}}" columns="{{ stationSummaryResult.columns }}" rows-visible=20>
+                </urth-viz-table>
+            </template>
+        </paper-card> 
+    </template>
+  metadata
+    {
+     "collapsed": false,
+     "urth": {
+      "dashboard": {
+       "layout": {
+        "col": 0,
+        "height": 22,
+        "row": 58,
+        "width": 12
+       }
+      }
+     }
+    }
+markdown
+    ### Temperature Record Analysis for Selected Station
+    
+    This widget provides the user with insights for selected station.
   metadata
     {
      "urth": {
@@ -852,16 +994,8 @@ code
             if os.path.isfile(fname):
                 os.remove(fname)
             sns_plot.savefig(fname)
-        channel("noaaquery").set("recordQueryResults", df_new)
         return sns_plot.fig
-  metadata
-    {
-     "collapsed": false,
-     "urth": {
-      "dashboard": {}
-     }
-    }
-code
+    
     def compute_record_durations(df,rectype):
         '''Return dataframe of max/min temperature record durations for each day.'''
         dates = create_date_list(df.Month.to_dict(),df.Day.to_dict())
@@ -895,27 +1029,11 @@ code
             if os.path.isfile(fname):
                 os.remove(fname)
             plt.savefig(fname)
-        channel("noaaquery").set("durationResults", df_durations)
         return fig
-  metadata
-    {
-     "collapsed": false,
-     "urth": {
-      "dashboard": {}
-     }
-    }
-code
-    def explore_station_data(station):
-        global DATA_STATION_DETAIL_RESULTS
-        df_station_detail = fetch_station_data(station)
-        channel("noaaquery").set("yearsOfService", compute_years_of_station_data(df_station_detail))
-        DATA_STATION_DETAIL_RESULTS = df_station_detail
-        return df_station_detail
     
     def explore_record_temperature_frequency(rectype,recfreqfactor):
         global DATA_FREQUENCY_RESULTS
         channel("noaaquery").set("isAboveFreqFactor", True)
-        channel("noaaquery").set("frequencyResultsAvailable", "")
         channel("noaaquery").set("numberRecordDays", 0)    
         if rectype == "High":
             df_record_days = compute_tmax_record_quantity(DATA_STATION_DETAIL_RESULTS,recfreqfactor)
@@ -924,9 +1042,9 @@ code
         if not df_record_days.empty:
             channel("noaaquery").set("numberRecordDays", len(df_record_days))
             DATA_FREQUENCY_RESULTS = df_record_days
-            channel("noaaquery").set("frequencyResultsAvailable", True)
         else:
-            channel("noaaquery").set("isAboveFreqFactor", "")
+            channel("noaaquery").set("isAboveFreqFactor", "")    
+        #display(Javascript("stationRecordFreqFunc.invoke()"))
         return df_record_days
   metadata
     {
@@ -937,67 +1055,19 @@ code
     }
 code
     %%html
-    <template id="station_synopsis_widget" is="urth-core-bind" channel="noaaquery">
-        <urth-core-function id="exploreStationDataFunc" 
-            ref="explore_station_data"
-            arg-station="[[station.0]]"
-            result="{{stationSummaryResult}}" auto>
-        </urth-core-function>
-        <paper-card style="width: 100%;" heading="Temperature Record Analysis Synopsis" elevation="1">
-             <template is="dom-if" if="{{stationSummaryResult}}">
-                <p>{{recType}} temperature record analysis using historical NOAA data from weather {{station.5}}.</p>
-                <p>This weather station has been in service and collecting data for {{yearsOfService}} years.</p>
-                <urth-viz-table datarows="{{ stationSummaryResult.data }}" selection="{{dayAtStation}}" columns="{{ stationSummaryResult.columns }}" rows-visible=20>
-                </urth-viz-table>
-            </template>
-        </paper-card> 
+    <template id="station_synopsis_data_widget" is="urth-core-bind" channel="noaaquery">
+        <urth-core-watch value="{{station.0}}">
+            <urth-core-function id="stationRecordFreqFunc"
+                ref="explore_record_temperature_frequency" 
+                arg-rectype="[[recType]]"
+                arg-recfreqfactor="[[occurrenceFactor]]"
+                result="{{stationFreqRecordsResult}}" auto>
+            </urth-core-function>
+        </urth-core-watch>  
     </template>
   metadata
     {
      "collapsed": false,
-     "urth": {
-      "dashboard": {
-       "layout": {
-        "col": 0,
-        "height": 26,
-        "row": 57,
-        "width": 12
-       }
-      }
-     }
-    }
-code
-    %%html
-    <template id="station_record_freq_widget" is="urth-core-bind" channel="noaaquery">
-        <urth-core-function id="stationRecordFreqFunc"
-            ref="explore_record_temperature_frequency" 
-            arg-rectype="[[recType]]"
-            arg-recfreqfactor="[[occurrenceFactor]]"
-            result="{{stationFreqRecordsResult}}" auto>
-        </urth-core-function>
-        <p>This station has experienced {{numberRecordDays}} days of new {{recType}} records where a new record has been set more than {{occurrenceFactor}} times throughout the operation of the station.</p>
-        <urth-viz-table datarows="{{ stationFreqRecordsResult.data }}" selection="{{dayAtStation}}" columns="{{ stationFreqRecordsResult.columns }}" rows-visible=20>
-        </urth-viz-table>
-    </template>
-  metadata
-    {
-     "collapsed": false,
-     "urth": {
-      "dashboard": {
-       "layout": {
-        "col": 0,
-        "height": 17,
-        "row": 83,
-        "width": 12
-       }
-      }
-     }
-    }
-markdown
-    ### Station Records Data Widget
-    This widget provides the user access to the actual temperature records pertaining to the interactive query.
-  metadata
-    {
      "urth": {
       "dashboard": {
        "hidden": true
@@ -1006,8 +1076,13 @@ markdown
     }
 code
     %%html
-    <template id="station_records_combo_widget" is="urth-core-bind" channel="noaaquery">
-        <template is="dom-if" if="{{frequencyResultsAvailable}}">
+    <template id="station_synopsis_chart_widget" is="urth-core-bind" channel="noaaquery">
+        <template is="dom-if" if="{{stationFreqRecordsResult}}">
+            <paper-card style="width: 100%;" heading="Temperature Record Analysis" elevation="1">
+                <p>This station has experienced {{numberRecordDays}} days of new {{recType}} records where a new record has been set more than {{occurrenceFactor}} times throughout the operation of the station.</p>
+                <urth-viz-table datarows="{{ stationFreqRecordsResult.data }}" selection="{{dayAtStation}}" columns="{{ stationFreqRecordsResult.columns }}" rows-visible=20>
+                </urth-viz-table>
+            </paper-card> 
             <template is="dom-if" if="{{isAboveFreqFactor}}">
                 <urth-core-function id="stationRecordsFunc" 
                     ref="plot_record_results"
@@ -1031,7 +1106,7 @@ code
             <template is="dom-if" if="{{!isAboveFreqFactor}}">
                 <p>This weather station has not experienced any days with greater than {{occurrenceFactor}} new {{recType}} records.</p>
             </template>
-        </template>
+        </template> 
     </template>
   metadata
     {
@@ -1040,8 +1115,8 @@ code
       "dashboard": {
        "layout": {
         "col": 0,
-        "height": 44,
-        "row": 100,
+        "height": 51,
+        "row": 80,
         "width": 12
        }
       }
@@ -1068,7 +1143,7 @@ markdown
        "layout": {
         "col": 0,
         "height": 14,
-        "row": 164,
+        "row": 151,
         "width": 12
        }
       }
