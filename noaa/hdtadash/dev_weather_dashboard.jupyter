@@ -188,6 +188,18 @@ code
 markdown
     
     ### Prepare Filesystem
+    
+    #### Data Preparation Options
+    
+    1. Use the [NOAA data Munging](https://github.com/ibm-et/jupyter-samples/tree/master/noaa/etl) project to generate CSV files for the latest NOAA data.
+    2. Use the sample **March 16, 2015** snapshot provided in this repo. Open a terminal session and run these commands:
+    ```
+    $ cd /home/main/notebooks/noaa/hdtadash/data/
+    $ tar -xvf station_summaries.tar
+    ```
+    
+    #### Plot Storage
+    
     Earlier versions of this notebook stored chart images to disk. We used a specific directory to store plot images (*.png files). However, this approach does not work if the notebook user would like to deploy as a local application. 
   metadata
     {
