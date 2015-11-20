@@ -22,7 +22,15 @@ markdown
     1. Work in progress
     2. Code works when executed in notebook view manually evaluating cells after each user interaction.
     3. Eventing for dashboarding view not work.
-    4, Map does not render even though code works using test notebook folium.ipynb
+    4. Map does not render even though code works using test notebook folium.ipynb
+  metadata
+    {
+     "urth": {
+      "dashboard": {
+       "hidden": true
+      }
+     }
+    }
 markdown
     
     ## Analysis
@@ -222,10 +230,10 @@ markdown
     }
 code
     # Use this global variable to specify the path for station summary files.
-    NOAA_STATION_SUMMARY_PATH = "/home/jovyan/work/noaa/data/"
+    NOAA_STATION_SUMMARY_PATH = "/home/main/notebooks/noaa/hdtadash/data/"
     
     # Use this global variable to specify the path for the GHCND Station Directory
-    STATION_DETAIL_FILE = '/home/jovyan/work/noaa/data/ghcnd-stations.txt'
+    STATION_DETAIL_FILE = '/home/main/notebooks/noaa/hdtadash/data/ghcnd-stations.txt'
     
     # Station detail structures for building station lists
     station_detail_colnames = ['StationID','State','Name',
@@ -324,7 +332,7 @@ code
     #process_station_detail_for_state(STATION_DETAIL_FILE,USA_STATION_LIST,"NE")
   metadata
     {
-     "collapsed": true,
+     "collapsed": false,
      "urth": {
       "dashboard": {}
      }

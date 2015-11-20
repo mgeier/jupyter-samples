@@ -7,7 +7,11 @@ markdown
     
     * [Exploration of Airline On-Time Performance](airline/Exploration%20of%20Airline%20On-Time%20Performance.ipynb)
     * [Hacker News and AlchemyAPI](hn/)
-    * [Historical Daily Temperature Analysis](noaa/)
+    * [Hooke's Law of Elasticity](Elasticity)
+    * NOAA Climatology Data
+        * [NOAA Climatology Data Processing](noaa/etl/)
+        * [High Temperature Record Frequency Notebook](noaa/tmaxfreq/)
+        * [Temperature Record Frequency Dashboard](noaa/hdtadash/)
     * [Instaquery](hacks/instaquery.ipynb)
     * [Interactive Data Maps](tax-maps/Interactive%20Data%20Maps.ipynb)
     * [IPy Parallel and R](hacks/IPython%20Parallel%20and%20R.ipynb)
