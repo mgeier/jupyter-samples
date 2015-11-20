@@ -865,7 +865,7 @@ code
         df_station_detail = fetch_station_data(station)
         channel("noaaquery").set("yearsOfService", compute_years_of_station_data(df_station_detail))
         DATA_STATION_DETAIL_RESULTS = df_station_detail
-        display(Javascript("exploreStationDataFunc.invoke()"))
+        display(Javascript("stationRecordFreqFunc.invoke()"))
         return df_station_detail
   metadata
     {
