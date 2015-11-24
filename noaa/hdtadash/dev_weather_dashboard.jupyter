@@ -18,18 +18,6 @@ markdown
      }
     }
 markdown
-    >STATUS NOTES:
-    1. all works using urth-core-watch patch and a few hacks.
-    2. ToDo: revisit code after v0.1.1 is released.
-  metadata
-    {
-     "urth": {
-      "dashboard": {
-       "hidden": true
-      }
-     }
-    }
-markdown
     
     ## Analysis
     
@@ -100,7 +88,7 @@ markdown
       }
      }
     }
-code
+code 2
     %matplotlib inline
   metadata
     {
@@ -109,7 +97,7 @@ code
       "dashboard": {}
      }
     }
-code
+code 3
     import os
     import struct
     import glob
@@ -140,7 +128,7 @@ markdown
       }
      }
     }
-code
+code 4
     %%html
     <link rel="import" href="urth_components/paper-dropdown-menu/paper-dropdown-menu.html" is='urth-core-import' package='PolymerElements/paper-dropdown-menu'>
     <link rel="import" href="urth_components/paper-menu/paper-menu.html" is='urth-core-import' package='PolymerElements/paper-menu'>
@@ -156,6 +144,24 @@ code
     <link rel="import" href="./urth-raw-html.html">
     <!-- HACK: Use Property Watch patch for v0.1.0 of declarativewidgets; This can be removed for v0.1.1 -->
     <link rel="import" href="./urth-core-watch.html">
+  display_data
+  - text/html
+    <link rel="import" href="urth_components/paper-dropdown-menu/paper-dropdown-menu.html" is='urth-core-import' package='PolymerElements/paper-dropdown-menu'>
+    <link rel="import" href="urth_components/paper-menu/paper-menu.html" is='urth-core-import' package='PolymerElements/paper-menu'>
+    <link rel="import" href="urth_components/paper-item/paper-item.html" is='urth-core-import' package='PolymerElements/paper-item'>
+    <link rel="import" href="urth_components/paper-button/paper-button.html" is='urth-core-import' package='PolymerElements/paper-button'>
+    <link rel="import" href="urth_components/paper-card/paper-card.html" is='urth-core-import' package='PolymerElements/paper-card'>
+    <link rel="import" href="urth_components/paper-slider/paper-slider.html" is='urth-core-import' package='PolymerElements/paper-slider'>
+    <link rel="import" href="urth_components/google-map/google-map.html" is='urth-core-import' package='GoogleWebComponents/google-map'>
+    <link rel="import" href="urth_components/google-map/google-map-marker.html" is='urth-core-import' package='GoogleWebComponents/google-map'>
+    <link rel="import" href="urth_components/urth-viz-table/urth-viz-table.html" is='urth-core-import'>
+    <link rel="import" href="urth_components/urth-viz-chart/urth-viz-chart.html" is='urth-core-import'>
+    <!-- Add custom Polymer Widget for injecting raw HTML into a urth-core widget -->
+    <link rel="import" href="./urth-raw-html.html">
+    <!-- HACK: Use Property Watch patch for v0.1.0 of declarativewidgets; This can be removed for v0.1.1 -->
+    <link rel="import" href="./urth-core-watch.html">
+  - text/plain
+    <IPython.core.display.HTML object>
   metadata
     {
      "collapsed": false,
@@ -175,7 +181,7 @@ markdown
       }
      }
     }
-code
+code 5
     DATA_STATE_STATION_LIST = None
     DATA_STATION_DETAIL_RESULTS = None
     DATA_FREQUENCY_RESULTS = None
@@ -232,7 +238,7 @@ markdown
       }
      }
     }
-code
+code 6
     IMAGE_DIRECTORY = "plotit"
     
     def image_cleanup(dirname):
@@ -263,7 +269,7 @@ markdown
       }
      }
     }
-code
+code 7
     # Use this global variable to specify the path for station summary files.
     NOAA_STATION_SUMMARY_PATH = "/home/main/notebooks/noaa/hdtadash/data/"
     
@@ -384,7 +390,7 @@ markdown
       }
      }
     }
-code
+code 8
     # -----------------------------------
     # Station Computation Methods
     # -----------------------------------
@@ -446,7 +452,7 @@ code
       "dashboard": {}
      }
     }
-code
+code 9
     # Use the Polymer Channel API to establish two-way binding between elements and data.
     from urth.widgets.widget_channels import channel
     channel("noaaquery").set("states", USA_STATES_WITH_STATIONS)
@@ -496,7 +502,7 @@ markdown
       }
      }
     }
-code
+code 10
     %%html
     <a name="narrationdata"></a>
     <template id="narrationContent" is="urth-core-bind" channel="noaaquery">
@@ -506,6 +512,18 @@ code
             <blockquote>Would you consider these results representative of extreme weather changes?</blockquote>
         </paper-card>
     </template>
+  display_data
+  - text/html
+    <a name="narrationdata"></a>
+    <template id="narrationContent" is="urth-core-bind" channel="noaaquery">
+        <template is="dom-if" if="{{isNarration}}">
+            <p>This application allows the user to explore historical NOAA data to observer the actual frequency at which weather stations in the USA have actually experienced new high and low temperature records.</p>
+            <blockquote>Are you able to identify a significant number of temperature changes within the weather station data?</blockquote>
+            <blockquote>Would you consider these results representative of extreme weather changes?</blockquote>
+        </paper-card>
+    </template>
+  - text/plain
+    <IPython.core.display.HTML object>
   metadata
     {
      "collapsed": false,
@@ -531,13 +549,22 @@ markdown
       }
      }
     }
-code
+code 11
     %%html
     <template id="weatherchannel_currentusamap" is="urth-core-bind" channel="noaaquery">
         <div id="wc_curmap">
             <center><embed src="http://i.imwx.com/images/maps/current/curwx_600x405.jpg" width="500" height="300"></center>
         <div id="wc_map">
     </template>
+  display_data
+  - text/html
+    <template id="weatherchannel_currentusamap" is="urth-core-bind" channel="noaaquery">
+        <div id="wc_curmap">
+            <center><embed src="http://i.imwx.com/images/maps/current/curwx_600x405.jpg" width="500" height="300"></center>
+        <div id="wc_map">
+    </template>
+  - text/plain
+    <IPython.core.display.HTML object>
   metadata
     {
      "collapsed": false,
@@ -568,7 +595,7 @@ markdown
       }
      }
     }
-code
+code 12
     def process_preferences(narrativepref,viewpref):
         if narrativepref == "Yes":
             channel("noaaquery").set("isNarration", True)
@@ -586,7 +613,7 @@ code
       "dashboard": {}
      }
     }
-code
+code 13
     %%html
     <a name="prefsettings"></a>
     <template id="setPreferences" is="urth-core-bind" channel="noaaquery">
@@ -624,6 +651,46 @@ code
             </div>
         </paper-card>
     </template>
+  display_data
+  - text/html
+    <a name="prefsettings"></a>
+    <template id="setPreferences" is="urth-core-bind" channel="noaaquery">
+        <urth-core-function id="applySettingFunc" 
+            ref="process_preferences" 
+            arg-narrativepref="{{narrationPreference}}"
+            arg-viewpref="{{displayPreference}}" auto>
+        </urth-core-function>
+        <paper-card heading="Preferences" elevation="1">
+            <div class="card-content">
+                <p class="widget">Select a narration preference to toggle informative content.
+                <paper-dropdown-menu label="Show Narration" selected-item-label="{{narrationPreference}}" noink>
+                    <paper-menu class="dropdown-content" selected="[[narrationPreference]]" attr-for-selected="label">
+                        <template is="dom-repeat" items="[[narrationToggleOptions]]">
+                            <paper-item label="[[item]]">[[item]]</paper-item>
+                        </template>
+                    </paper-menu>
+                </paper-dropdown-menu></p>
+                <p class="widget">Would you like a geospacial view of a selected weather station?
+                <paper-dropdown-menu label="Select Display Type" selected-item-label="{{displayPreference}}" noink>
+                    <paper-menu class="dropdown-content" selected="[[displayPreference]]" attr-for-selected="label">
+                        <template is="dom-repeat" items="[[displayTypeOptions]]">
+                            <paper-item label="[[item]]">[[item]]</paper-item>
+                        </template>
+                    </paper-menu>
+                </paper-dropdown-menu></p>
+                <p class="widget">Would you like to purge disk storage more frequently?
+                <paper-dropdown-menu label="Manage Storage" selected-item-label="{{cleanupPreference}}" noink>
+                    <paper-menu class="dropdown-content" selected="[[cleanupPreference]]" attr-for-selected="label">
+                        <template is="dom-repeat" items="[[cleanupToggleOptions]]">
+                            <paper-item label="[[item]]">[[item]]</paper-item>
+                        </template>
+                    </paper-menu>
+                </paper-dropdown-menu></p>
+            </div>
+        </paper-card>
+    </template>
+  - text/plain
+    <IPython.core.display.HTML object>
   metadata
     {
      "collapsed": false,
@@ -651,7 +718,7 @@ markdown
       }
      }
     }
-code
+code 14
     def process_query(fname,stations,statecode,cleanuppref):
         global DATA_STATE_STATION_LIST
         if cleanuppref == "Yes":
@@ -670,7 +737,7 @@ code
       "dashboard": {}
      }
     }
-code
+code 15
     %%html
     <a name="loaddata"></a>
     <template id="loadCard" is="urth-core-bind" channel="noaaquery">
@@ -721,6 +788,59 @@ code
             </div>
         </paper-card>
     </template
+  display_data
+  - text/html
+    <a name="loaddata"></a>
+    <template id="loadCard" is="urth-core-bind" channel="noaaquery">
+        <urth-core-function id="loadDataFunc" 
+            ref="process_query" 
+            arg-fname="{{stationDetail}}"
+            arg-stations="{{stationList}}"
+            arg-statecode="{{stateAbbrev}}"
+            arg-cleanuppref="{{cleanupPreference}}"
+            result="{{stationQueryResult}}"
+            is-ready="{{isloadready}}">
+        </urth-core-function>
+        <paper-card heading="Query Preferences" elevation="1">
+            <div class="card-content">
+                <div>
+                    <p class="widget">Which region of weather stations in the USA do you wish to examine?.</p>
+                    <paper-dropdown-menu label="Select State" selected-item-label="{{stateAbbrev}}" noink>
+                        <paper-menu class="dropdown-content" selected="{{stateAbbrev}}" attr-for-selected="label">
+                            <template is="dom-repeat" items="[[states]]">
+                                <paper-item label="[[item]]">[[item]]</paper-item>
+                            </template>
+                        </paper-menu>
+                    </paper-dropdown-menu>
+                </div>
+                <div>
+                    <p class="widget">Are you interested in daily minimum or maximum temperature records per station?.</p>
+                    <paper-dropdown-menu label="Select Record Type" selected-item-label="{{recType}}" noink>
+                        <paper-menu class="dropdown-content" selected="[[recType]]" attr-for-selected="label">
+                            <template is="dom-repeat" items="[[recordTypeOptions]]">
+                                <paper-item label="[[item]]">[[item]]</paper-item>
+                            </template>
+                        </paper-menu>
+                    </paper-dropdown-menu>
+                </div>
+                <div>
+                    <p class="widget">Each weather station has observed more than one new minimum or maximum temperature record event. How many new record occurrences would you consider significant enough to raise concerns about extreme weather fluctuations?.</p>
+                    <paper-dropdown-menu label="Select Occurrence Factor" selected-item-label="{{occurrenceFactor}}" noink>
+                        <paper-menu class="dropdown-content" selected="[[occurrenceFactor]]" attr-for-selected="label">
+                            <template is="dom-repeat" items="[[recordOccuranceOptions]]">
+                                <paper-item label="[[item]]">[[item]]</paper-item>
+                            </template>
+                        </paper-menu>
+                    </paper-dropdown-menu>
+                </div>
+            </div>
+            <div class="card-actions">
+                <paper-button tabindex="0" disabled="{{!isloadready}}" onClick="loadDataFunc.invoke()">Apply</paper-button>
+            </div>
+        </paper-card>
+    </template
+  - text/plain
+    <IPython.core.display.HTML object>
   metadata
     {
      "collapsed": false,
@@ -747,7 +867,7 @@ markdown
       }
      }
     }
-code
+code 16
     %%html
     <template id="channelMonitorWidget" is="urth-core-bind" channel="noaaquery">
         <h2 class="widget">Channel Monitor</h2>
@@ -784,6 +904,45 @@ code
         </table>
         <p class="widget">{{recType}} temperature record analysis using historical NOAA data from weather {{station.5}}.</p>
     </template>
+  display_data
+  - text/html
+    <template id="channelMonitorWidget" is="urth-core-bind" channel="noaaquery">
+        <h2 class="widget">Channel Monitor</h2>
+        <p class="widget"><b>Query Selections:</b></p>
+        <table border="1" align="center">
+            <tr>
+                <th>Setting</th>
+                <th>Value</th>
+            </tr>
+            <tr>
+                <td>State</td>
+                <td>{{stateAbbrev}}</td>
+            </tr>
+            <tr>
+                <td>Record Type</td>
+                <td>{{recType}}</td>
+            </tr>
+            <tr>
+                <td>Occurance Factor</td>
+                <td>{{occurrenceFactor}}</td>
+            </tr>
+            <tr>
+                <td>Station ID</td>
+                <td>{{station.0}}</td>
+            </tr>
+            <tr>
+                <td>Narration</td>
+                <td>{{isNarration}}</td>
+            </tr>
+            <tr>
+                <td>Map View</td>
+                <td>{{isMap}}</td>
+            </tr>
+        </table>
+        <p class="widget">{{recType}} temperature record analysis using historical NOAA data from weather {{station.5}}.</p>
+    </template>
+  - text/plain
+    <IPython.core.display.HTML object>
   metadata
     {
      "collapsed": false,
@@ -806,7 +965,7 @@ markdown
       }
      }
     }
-code
+code 17
     # Use Python to generate a Folium Map with Markers for each weather station in the selected state.
     def display_map(m, height=500):
         '''Takes a folium instance and embed HTML.'''
@@ -845,7 +1004,7 @@ markdown
       }
      }
     }
-code
+code 18
     %%html
     <template id="station_detail_combo_func" is="urth-core-bind" channel="noaaquery">
         <urth-core-watch value="{{stationResultsReady}}">
@@ -855,6 +1014,18 @@ code
             </urth-core-function>
         </urth-core-watch>
     </template>
+  display_data
+  - text/html
+    <template id="station_detail_combo_func" is="urth-core-bind" channel="noaaquery">
+        <urth-core-watch value="{{stationResultsReady}}">
+            <urth-core-function id="renderFoliumMapFunc" 
+                ref="render_map"
+                result="{{foliumMap}}" auto>
+            </urth-core-function>
+        </urth-core-watch>
+    </template>
+  - text/plain
+    <IPython.core.display.HTML object>
   metadata
     {
      "collapsed": false,
@@ -864,7 +1035,7 @@ code
       }
      }
     }
-code
+code 19
     %%html
     <template id="station_detail_combo_widget" is="urth-core-bind" channel="noaaquery">
         <paper-card style="width: 100%;" heading="{{stateAbbrev}} Weather Stations" elevation="1">
@@ -880,6 +1051,24 @@ code
             </template>
         </template>
     </template>
+  display_data
+  - text/html
+    <template id="station_detail_combo_widget" is="urth-core-bind" channel="noaaquery">
+        <paper-card style="width: 100%;" heading="{{stateAbbrev}} Weather Stations" elevation="1">
+            <p>These are the weather stations monitoring local conditions. Select a station to explore historical record temperatures.</p>
+            <urth-viz-table datarows="{{ stationQueryResult.data }}" selection="{{station}}" columns="{{ stationQueryResult.columns }}" rows-visible=20>
+            </urth-viz-table>
+        </paper-card>
+        <template is="dom-if" if="{{isNewQuery}}">
+            <template is="dom-if" if="{{isMap}}">
+                <div>
+                    <urth-raw-html html="{{foliumMap}}"/>
+                </div>
+            </template>
+        </template>
+    </template>
+  - text/plain
+    <IPython.core.display.HTML object>
   metadata
     {
      "collapsed": false,
@@ -906,7 +1095,7 @@ markdown
       }
      }
     }
-code
+code 20
     def explore_station_data(station):
         global DATA_STATION_DETAIL_RESULTS
         df_station_detail = fetch_station_data(station)
@@ -921,7 +1110,7 @@ code
       "dashboard": {}
      }
     }
-code
+code 21
     %%html
     <template id="station_summary_widget" is="urth-core-bind" channel="noaaquery">
         <urth-core-function id="exploreStationDataFunc" 
@@ -938,6 +1127,25 @@ code
             </template>
         </paper-card> 
     </template>
+  display_data
+  - text/html
+    <template id="station_summary_widget" is="urth-core-bind" channel="noaaquery">
+        <urth-core-function id="exploreStationDataFunc" 
+            ref="explore_station_data"
+            arg-station="[[station.0]]"
+            result="{{stationSummaryResult}}" auto>
+        </urth-core-function>
+        <paper-card style="width: 100%;" heading="Station Summary" elevation="1">
+             <template is="dom-if" if="{{stationSummaryResult}}">
+                <p>{{recType}} temperature record analysis using historical NOAA data from weather {{station.5}}.</p>
+                <p>This weather station has been in service and collecting data for {{yearsOfService}} years.</p>
+                <urth-viz-table datarows="{{ stationSummaryResult.data }}" selection="{{dayAtStation}}" columns="{{ stationSummaryResult.columns }}" rows-visible=20>
+                </urth-viz-table>
+            </template>
+        </paper-card> 
+    </template>
+  - text/plain
+    <IPython.core.display.HTML object>
   metadata
     {
      "collapsed": false,
@@ -964,7 +1172,7 @@ markdown
       }
      }
     }
-code
+code 22
     def plot_record_results(rectype,fname=None):
         df = DATA_FREQUENCY_RESULTS
         plt.figure(figsize = (9,9), dpi = 72)
@@ -1053,7 +1261,7 @@ code
       "dashboard": {}
      }
     }
-code
+code 23
     %%html
     <template id="station_synopsis_data_widget" is="urth-core-bind" channel="noaaquery">
         <urth-core-watch value="{{station.0}}">
@@ -1065,6 +1273,20 @@ code
             </urth-core-function>
         </urth-core-watch>  
     </template>
+  display_data
+  - text/html
+    <template id="station_synopsis_data_widget" is="urth-core-bind" channel="noaaquery">
+        <urth-core-watch value="{{station.0}}">
+            <urth-core-function id="stationRecordFreqFunc"
+                ref="explore_record_temperature_frequency" 
+                arg-rectype="[[recType]]"
+                arg-recfreqfactor="[[occurrenceFactor]]"
+                result="{{stationFreqRecordsResult}}" auto>
+            </urth-core-function>
+        </urth-core-watch>  
+    </template>
+  - text/plain
+    <IPython.core.display.HTML object>
   metadata
     {
      "collapsed": false,
@@ -1074,7 +1296,7 @@ code
       }
      }
     }
-code
+code 24
     %%html
     <template id="station_synopsis_chart_widget" is="urth-core-bind" channel="noaaquery">
         <template is="dom-if" if="{{stationFreqRecordsResult}}">
@@ -1108,6 +1330,42 @@ code
             </template>
         </template> 
     </template>
+  display_data
+  - text/html
+    <template id="station_synopsis_chart_widget" is="urth-core-bind" channel="noaaquery">
+        <template is="dom-if" if="{{stationFreqRecordsResult}}">
+            <paper-card style="width: 100%;" heading="Temperature Record Analysis" elevation="1">
+                <p>This station has experienced {{numberRecordDays}} days of new {{recType}} records where a new record has been set more than {{occurrenceFactor}} times throughout the operation of the station.</p>
+                <urth-viz-table datarows="{{ stationFreqRecordsResult.data }}" selection="{{dayAtStation}}" columns="{{ stationFreqRecordsResult.columns }}" rows-visible=20>
+                </urth-viz-table>
+            </paper-card> 
+            <template is="dom-if" if="{{isAboveFreqFactor}}">
+                <urth-core-function id="stationRecordsFunc" 
+                    ref="plot_record_results"
+                    arg-rectype="[[recType]]"
+                    result="{{stationRecordsPlot}}" auto>
+                </urth-core-function>
+                <urth-core-function id="stationDurationsFunc" 
+                    ref="plot_duration_results"
+                    arg-rectype="[[recType]]"
+                    result="{{stationDurationsPlot}}" auto>
+                </urth-core-function>
+                <paper-card heading="Station {{station.0}} Records Per Day" elevation="0">
+                    <p>The current {{recType}} temperature record for each day that has experienced more than {{occurrenceFactor}} new record events since the station has come online.</p>
+                    <img src="{{stationRecordsPlot}}"/><br/>
+                </paper-card>
+                <paper-card heading="Duration of Station {{station.0}} Records Per Day" elevation="0">
+                    <p>For each day that has experienced more than {{occurrenceFactor}} {{recType}} temperature records, some days have had records stand for a large portion of the life of the station.</p>
+                    <img src="{{stationDurationsPlot}}"/>
+                </paper-card>
+            </template>
+            <template is="dom-if" if="{{!isAboveFreqFactor}}">
+                <p>This weather station has not experienced any days with greater than {{occurrenceFactor}} new {{recType}} records.</p>
+            </template>
+        </template> 
+    </template>
+  - text/plain
+    <IPython.core.display.HTML object>
   metadata
     {
      "collapsed": false,
